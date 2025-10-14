@@ -1,0 +1,4 @@
+.v-catbar { border-bottom:1px solid #222; background:#0f0f0f; padding:8px 0; }
+.cat-btn { margin-right:8px; padding:8px 12px; border-radius:999px; background:#1a1a1a; color:#cfd8dc; border:0; cursor:pointer; }
+.cat-btn:hover { background:#242424; }
+.cat-btn.active { background:#fff; color:#000; }
