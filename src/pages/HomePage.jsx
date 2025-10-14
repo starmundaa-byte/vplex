@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { fetchVideos } from "../api/youtube";
-import VideoCard from "../components/videocard";
+import VideoCard from "../components/VideoCard";
 import "./HomePage.css";
 
 /*
