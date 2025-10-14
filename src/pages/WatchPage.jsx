@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { fetchVideoById } from "../api/youtube";
-import "./WatchPage.css"; 
+import "./watchpage.css"; 
 
 /*
  Watch page:

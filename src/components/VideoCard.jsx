@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import "./VideoCard.css";
+import "./videocard.css";
 
 /*
  Expects video shape from search API item:

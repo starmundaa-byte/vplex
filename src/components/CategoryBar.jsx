@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./CategoryBar.css";
+import "./categorybar.css";
 
 const CATS = ["All","Music","Gaming","News","Live","Comedy","Sports","Education","Tech"];
 

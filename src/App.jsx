@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
-import CategoryBar from "./components/CategoryBar";
-import HomePage from "./pages/HomePage";
-import WatchPage from "./pages/WatchPage";
+import header from "./Components/header";
+import categorybar from "./Components/categorybar";
+import homepage from "./pages/homepage";
+import watchpage from "./pages/watchpage";
 
 /*
  Initialize Google Identity Services button if client id provided.
