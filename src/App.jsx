@@ -1,7 +1,7 @@
 import Header from "./components/Header";
 import CategoryBar from "./components/CategoryBar";
-import Home from "./pages/Home";
-import Watch from "./pages/Watch";
+import HomePage from "./pages/HomePage";
+import WatchPage from "./pages/WatchPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 
