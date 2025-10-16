@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import CategoryBar from "./components/CategoryBar";
-import HomePage from "./pages/HomePage";
-import WatchPage from "./pages/WatchPage";
+import Home from "./pages/Home";
+import Watch from "./pages/Watch";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
 
 
 /*
