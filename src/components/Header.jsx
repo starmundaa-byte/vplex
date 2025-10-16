@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./header.css";
+import "./Header.css";
 
 /*
  Uses Google Identity Services for sign-in.
