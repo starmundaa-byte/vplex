@@ -1,7 +1,8 @@
-import Header from "./components/Header";
-import CategoryBar from "./components/CategoryBar";
-import HomePage from "./pages/HomePage";
-import WatchPage from "./pages/WatchPage";
+import Header from "./Components/Header";
+import CategoryBar from "./Components/CategoryBar";
+import Video from "./Components/Video"; // if used
+import Home from "./pages/Home";
+import Watch from "./pages/Watch";      // exact filename Watch.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 
