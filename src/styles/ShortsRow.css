@@ -1,0 +1,137 @@
+.shorts-row-root {
+  width: 100%;
+  background: transparent;
+  color: white;
+  padding: 8px 0;
+}
+
+.shorts-header {
+  display: flex;
+  align-items: center;
+  padding: 0 6px 8px;
+}
+
+.shorts-title {
+  font-weight: 700;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* container wrap to position arrows */
+.shorts-container-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* the horizontal scroll container */
+.shorts-container {
+  display: flex;
+  gap: 12px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* hide default scrollbar visually */
+.shorts-container::-webkit-scrollbar { display: none; }
+.shorts-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* each short item */
+.short-item {
+  flex: 0 0 auto;
+  width: 170px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.short-thumb-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 180%; /* tall thumbnail */
+  border-radius: 8px;
+  overflow: hidden;
+  background: #222;
+}
+
+.short-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* duration */
+.short-duration {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  background: rgba(0,0,0,0.6);
+  padding: 3px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* play overlay center */
+.play-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 22px;
+  opacity: 0.95;
+  color: white;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+}
+
+/* meta under thumbnail */
+.short-meta {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #ddd;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* arrows */
+.shorts-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  color: #fff;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 30;
+}
+
+.shorts-arrow.left {
+  left: 8px;
+}
+
+.shorts-arrow.right {
+  right: 8px;
+}
+
+.shorts-arrow:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* dragging UX */
+.shorts-container.dragging {
+  cursor: grabbing;
+  cursor: -webkit-grabbing;
+}

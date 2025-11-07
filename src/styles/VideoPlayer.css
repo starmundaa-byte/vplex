@@ -1,0 +1,158 @@
+.video-player {
+  position: relative;
+  width: 100%;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Normal long video (16:9 aspect ratio) */
+.video-player .video-element,
+.video-player iframe {
+  width: 100%;
+  height: 65vh; /* increased height */
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+/* Shorts mode */
+.video-player.shorts-mode .video-element {
+  width: auto;
+  height: 100vh;
+  object-fit: cover;
+}
+
+/* Sticky for mobile/tablet */
+@media (max-width: 1024px) {
+  .video-player {
+    position: sticky;
+    top: 60px;
+    z-index: 10;
+  }
+}
+
+/* Player controls */
+.player-controls {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Left-side dismiss button only for mini mode */
+.video-player.mini .player-controls {
+  right: 10px;
+  left: 10px;
+  justify-content: space-between;
+}
+
+.control-btn {
+  background: rgba(0, 0, 0, 0.4);
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.control-btn.transparent {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+/* Dismiss (only mini) */
+.control-btn.dismiss {
+  background: rgba(255, 0, 0, 0.5);
+}
+
+/* Mini-player mode */
+.video-player.mini {
+  position: fixed !important;
+  width: 300px;
+  height: 170px;
+  bottom: 20px;
+  right: 20px;
+  z-index: 2000;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.5);
+  background-color: black;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.video-player.mini .video-element,
+.video-player.mini iframe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #fff;
+  z-index: 999;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.next-video-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.next-video-box img {
+  width: 60%;
+  max-width: 400px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.next-video-box button {
+  background: #cc0000;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 6px;
+  cursor: pointer;
+}
+
+.next-video-box button:hover {
+  background: #ff0000;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.video-wrapper iframe {
+  position: relative;
+  z-index: 1;
+}
+
+.video-overlay {
+  z-index: 2;
+}

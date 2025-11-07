@@ -1,0 +1,24 @@
+.watch-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  height: 100vh;
+  width: 100%;
+}
+
+.watch-player-container {
+  position: relative;
+  width: 90%;
+  max-width: 1000px;
+  aspect-ratio: 16 / 9;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.watch-player-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}

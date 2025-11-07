@@ -1,0 +1,219 @@
+/* General header layout */
+.header {
+  position: fixed;
+  top: 0;
+  height: 50px;
+  width: 100%;
+  background: #121212;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px;
+  z-index: 1000;
+}
+
+/* Buttons and icons */
+.icon-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Search bar */
+.search-bar {
+  flex: 1;
+  margin: 0 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar input {
+  width: 100%;
+  height: 30px;
+  padding: 5px 35px 5px 10px;
+  border-radius: 4px;
+  border: none;
+  outline: none;
+}
+
+.search-btn {
+  position: absolute;
+  right: 5px;
+  background: rgb(0, 204, 255);
+  border: none;
+  font-size: 21px;
+  cursor: pointer;
+}
+
+/* Suggestions dropdown */
+.suggestion-box {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  right: 0;
+  background: #222;
+  color: white;
+  border-radius: 4px;
+  padding: 5px;
+  z-index: 1001;
+}
+
+.suggestion-section {
+  margin-bottom: 8px;
+}
+
+.suggestion-title {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.suggestion-box p {
+  padding: 4px;
+  margin: 0;
+  cursor: pointer;
+}
+
+.suggestion-box p:hover {
+  background: #333;
+}
+
+.no-item {
+  opacity: 0.6;
+}
+
+/* Slide menu (from LEFT side now) */
+.side-menu {
+  position: fixed;
+  top: 0;
+  left: -250px; /* start hidden off-screen on the left */
+  width: 250px;
+  height: 100vh;
+  background: #1e1e1e;
+  color: white;
+  transition: left 0.3s ease; /* animate horizontally */
+  padding: 10px;
+  z-index: 1100;
+}
+
+.side-menu.open {
+  left: 0; /* slide in from the left */
+}
+
+.side-menu .dismiss {
+  float: right;
+  font-size: 20px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.side-menu ul {
+  list-style: none;
+  padding: 40px 0 0 10px;
+}
+
+.side-menu li {
+  margin: 15px 0;
+  cursor: pointer;
+}
+
+
+/* Voice modal */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1200;
+}
+
+.voice-modal {
+  background: #222;
+  color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 250px;
+}
+
+.voice-modal .dismiss {
+  float: right;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.mic-anim {
+  font-size: 40px;
+  margin: 10px 0;
+}
+
+/* Dropdowns */
+.dropdown {
+  position: fixed;
+  top: 55px;
+  right: 10px;
+  background: #222;
+  color: white;
+  border-radius: 6px;
+  width: 220px;
+  z-index: 1100;
+  box-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid #333;
+}
+
+.dropdown-header button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+.dropdown-body {
+  padding: 10px;
+  text-align: left;
+}
+
+.dropdown.profile {
+  right: 60px;
+}
+
+.dropdown-body button {
+  background: #444;
+  border: none;
+  color: white;
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.dropdown-body button:hover {
+  background: #666;
+}
