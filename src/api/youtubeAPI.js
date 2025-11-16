@@ -5,7 +5,7 @@ import axios from "axios";
    🔑 Multi API Key Rotation Setup
 ------------------------------------------- */
 const API_KEYS = [
-"AIzaSyC-uwwoegGzxr4-Hk4B7aMrEw-znrYJNTs"
+"AIzaSyCxHN_LvucVaJXAnlgABDM78nbTBVP1Ios"
   // add more keys if needed
 ];
 
