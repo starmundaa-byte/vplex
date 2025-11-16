@@ -1,8 +1,8 @@
 // src/main.jsx
 import React, { useEffect, useState, createContext } from "react";
 import ReactDOM from "react-dom/client";
-import App from "../App";
-import "../index.css";
+import App from "./App";
+import "./index.css";
 import { onAuthChange, initAuthPersistence } from "../api/userService"; // ✅ use our service
 
 export const UserContext = createContext(null);
