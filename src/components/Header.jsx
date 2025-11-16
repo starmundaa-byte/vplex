@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 import { initGA, logPageView, logEvent } from "../utils/analytics";
 import { UserContext } from "../main";
-import { signInWithGoogle, signOutUser } from "../api/userservice";
+import { signInWithGoogle, signOutUser } from "../api/UserService";
 
 const Header = ({ onSearch, onSearchReset }) => {
   const [menuOpen, setMenuOpen] = useState(false);
