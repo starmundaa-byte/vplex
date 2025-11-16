@@ -1,58 +1,136 @@
-// ✅ src/api/firestoreService.js
+// src/api/firestoreService.js
 import {
   collection,
-  addDoc,
-  getDocs,
   doc,
+  setDoc,
+  getDocs,
   getDoc,
   query,
   where,
+  orderBy,
   limit as limitFn,
+  updateDoc,
+  arrayUnion,
+  serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
-const COLLECTION = "videos";
+const VIDEOS_COLLECTION = "videos";
 
 /**
- * 💾 Save multiple videos to Firestore
+ * Save (or merge) multiple videos to Firestore.
+ * - Uses videoId as the document id to avoid duplicates.
+ * - Adds the provided keyword into a `keywords` array for fallback search.
+ * - Uses setDoc(..., { merge: true }) so we don't overwrite existing fields.
  */
-export const saveVideosToFirestore = async (videos) => {
+export const saveVideosToFirestore = async (videos = [], keyword = "general") => {
   try {
-    const videosRef = collection(db, COLLECTION);
+    if (!Array.isArray(videos) || videos.length === 0) return;
+
+    const key = String(keyword || "general").trim().toLowerCase().replace(/\s+/g, "_");
+
     for (const v of videos) {
-      await addDoc(videosRef, v);
+      const id = v.id || v.videoId;
+      if (!id) continue;
+
+      const docRef = doc(db, VIDEOS_COLLECTION, id);
+
+      // Build normalized doc
+      const docData = {
+        videoId: id,
+        title: v.title || v.snippet?.title || "",
+        thumbnail:
+          (v.thumbnail && v.thumbnail.url) ||
+          v.snippet?.thumbnails?.medium?.url ||
+          v.thumbnailUrl ||
+          `https://img.youtube.com/vi/${id}/mqdefault.jpg`,
+        channelTitle: v.channelTitle || v.snippet?.channelTitle || v.channel || "",
+        channelId: v.channelId || v.snippet?.channelId || "",
+        category: v.category || (v.snippet && v.snippet.categoryId) || "",
+        description: v.description || v.snippet?.description || "",
+        tags: v.tags || v.snippet?.tags || [],
+        publishedAt: v.publishedAt || v.snippet?.publishedAt || null,
+        updatedAt: serverTimestamp(),
+      };
+
+      // Merge doc & add keyword to keywords array
+      // If document exists, update; otherwise set with merge
+      await setDoc(docRef, { ...docData }, { merge: true });
+
+      // Add keyword to keywords array for fallback search
+      try {
+        await updateDoc(docRef, {
+          keywords: arrayUnion(key),
+        });
+      } catch (e) {
+        // If updateDoc fails (e.g. doc unexpectedly missing) ignore — doc was set with setDoc above
+      }
     }
-  } catch (error) {
-    console.error("❌ Error saving to Firestore:", error);
+    console.log(`✅ Saved ${videos.length} videos to Firestore (keyword: ${key})`);
+  } catch (err) {
+    console.error("❌ saveVideosToFirestore error:", err);
   }
 };
 
 /**
- * 📥 Get all videos from Firestore
+ * Fetch cached videos by keyword (fallback).
+ * Looks for documents where `keywords` array contains the normalized key.
  */
-export const getVideosFromFirestore = async () => {
+export const fetchMetaVideos = async (keyword = "general", limit = 24) => {
   try {
-    const snapshot = await getDocs(collection(db, COLLECTION));
-    return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("❌ Error fetching from Firestore:", error);
+    const key = String(keyword || "general").trim().toLowerCase().replace(/\s+/g, "_");
+    const col = collection(db, VIDEOS_COLLECTION);
+
+    // Query by keywords array
+    const q = query(col, where("keywords", "array-contains", key), orderBy("updatedAt", "desc"), limitFn(limit));
+    const snap = await getDocs(q);
+
+    const results = [];
+    snap.forEach((d) => {
+      results.push({ id: d.id, ...d.data() });
+    });
+
+    if (results.length === 0) {
+      // fallback: return a limited set of latest videos if keyword search empty
+      const allQ = query(col, orderBy("updatedAt", "desc"), limitFn(limit));
+      const allSnap = await getDocs(allQ);
+      const fallback = [];
+      allSnap.forEach((d) => fallback.push({ id: d.id, ...d.data() }));
+      return fallback;
+    }
+
+    return results;
+  } catch (err) {
+    console.error("❌ fetchMetaVideos error:", err);
     return [];
   }
 };
 
 /**
- * 🔎 Get related videos from Firestore
- * Strategy:
- *  - Find the current video doc (by ID)
- *  - Fetch videos from the same channel, category, or matching tags
- *  - Combine & deduplicate
+ * Get some recent videos from Firestore (generic home fallback).
+ */
+export const getVideosFromFirestore = async (limit = 24) => {
+  try {
+    const col = collection(db, VIDEOS_COLLECTION);
+    const q = query(col, orderBy("updatedAt", "desc"), limitFn(limit));
+    const snap = await getDocs(q);
+    const items = [];
+    snap.forEach((d) => items.push({ id: d.id, ...d.data() }));
+    return items;
+  } catch (err) {
+    console.error("❌ getVideosFromFirestore error:", err);
+    return [];
+  }
+};
+
+/**
+ * Get related videos from Firestore (existing logic adapted)
  */
 export const getRelatedFirestoreVideos = async (videoId, maxResults = 12) => {
   try {
     if (!videoId) return [];
 
-    // 🧩 1. Get current video data
-    const currentSnap = await getDoc(doc(db, COLLECTION, videoId));
+    const currentSnap = await getDoc(doc(db, VIDEOS_COLLECTION, videoId));
     if (!currentSnap.exists()) {
       console.warn("⚠️ No Firestore document found for video:", videoId);
       return [];
@@ -63,79 +141,44 @@ export const getRelatedFirestoreVideos = async (videoId, maxResults = 12) => {
     const category = current.category || "";
     const tags = Array.isArray(current.tags) ? current.tags : [];
 
-    // Helper to run and map query results
     const runQuery = async (q) => {
       const snap = await getDocs(q);
       const items = [];
       snap.forEach((d) => {
-        if (d.id === videoId) return; // skip current video
-        const data = d.data();
-        items.push({
-          id: d.id,
-          title: data.title || "",
-          thumbnail: data.thumbnail || data.thumbnailUrl || "",
-          channelTitle: data.channelTitle || "",
-          channelLogo: data.channelLogo || "",
-          publishedAt: data.publishedAt || "",
-          views: data.views || 0,
-          category: data.category || "",
-          tags: data.tags || [],
-        });
+        if (d.id === videoId) return;
+        items.push({ id: d.id, ...d.data() });
       });
       return items;
     };
 
-    // 🧠 2. Build queries
+    const col = collection(db, VIDEOS_COLLECTION);
     const queries = [];
 
     if (channelId) {
-      queries.push(
-        runQuery(
-          query(collection(db, COLLECTION), where("channelId", "==", channelId), limitFn(6))
-        )
-      );
+      queries.push(runQuery(query(col, where("channelId", "==", channelId), limitFn(6))));
     }
-
     if (category) {
-      queries.push(
-        runQuery(
-          query(collection(db, COLLECTION), where("category", "==", category), limitFn(6))
-        )
-      );
+      queries.push(runQuery(query(col, where("category", "==", category), limitFn(6))));
     }
-
     if (tags.length > 0) {
-      const tagSlice = tags.slice(0, 10); // Firestore max for array-contains-any
-      queries.push(
-        runQuery(
-          query(
-            collection(db, COLLECTION),
-            where("tags", "array-contains-any", tagSlice),
-            limitFn(8)
-          )
-        )
-      );
+      const tagSlice = tags.slice(0, 10);
+      queries.push(runQuery(query(col, where("tags", "array-contains-any", tagSlice), limitFn(8))));
     }
 
-    if (queries.length === 0) {
-      console.warn("⚠️ No valid query fields (channel/category/tags) for related videos");
-      return [];
-    }
+    if (queries.length === 0) return [];
 
-    // 🧩 3. Run all queries in parallel
     const results = await Promise.all(queries);
     const merged = results.flat();
 
-    // 🧹 4. Deduplicate
-    const uniqueMap = new Map();
+    // Deduplicate preserving order
+    const map = new Map();
     merged.forEach((v) => {
-      if (!uniqueMap.has(v.id)) uniqueMap.set(v.id, v);
+      if (!map.has(v.id)) map.set(v.id, v);
     });
 
-    const final = Array.from(uniqueMap.values()).slice(0, maxResults);
-    return final;
-  } catch (error) {
-    console.error("❌ Error fetching related Firestore videos:", error);
+    return Array.from(map.values()).slice(0, maxResults);
+  } catch (err) {
+    console.error("❌ getRelatedFirestoreVideos error:", err);
     return [];
   }
 };

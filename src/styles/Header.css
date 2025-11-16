@@ -49,7 +49,7 @@
 .search-btn {
   position: absolute;
   right: 5px;
-  background: rgb(0, 204, 255);
+  background:white(232, 234, 235);
   border: none;
   font-size: 21px;
   cursor: pointer;
@@ -216,4 +216,22 @@
 
 .dropdown-body button:hover {
   background: #666;
+}
+
+/* 🔹 New search active styles */
+.header .back-btn {
+  font-size: 22px;
+  margin-right: 8px;
+}
+
+/* Optional smooth transitions */
+.header .title,
+.header .icon-btn,
+.header .search-bar {
+  transition: all 0.3s ease;
+}
+
+.search-bar.active {
+  flex: 1;
+  margin-left: 10px;
 }

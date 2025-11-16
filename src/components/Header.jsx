@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+// Updated Header.jsx with required search behavior
+import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Header.css";
-
-// 🔹 import analytics helpers
 import { initGA, logPageView, logEvent } from "../utils/analytics";
+import { UserContext } from "../main";
+import { signInWithGoogle, signOutUser } from "../api/userService";
 
 const Header = ({ onSearch, onSearchReset }) => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -13,34 +14,31 @@ const Header = ({ onSearch, onSearchReset }) => {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [isSearchActive, setIsSearchActive] = useState(false);
   const recognitionRef = useRef(null);
   const headerRef = useRef(null);
+
+  const { user, setUser } = useContext(UserContext);
+  const isLoggedIn = !!user;
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ Initialize GA only once on app load
   useEffect(() => {
     initGA();
     logPageView(window.location.pathname + window.location.search);
   }, []);
 
-  // ✅ Log every route change (auto page tracking)
   useEffect(() => {
     logPageView(location.pathname + location.search);
   }, [location]);
 
-  // ✅ Load login + searches
   useEffect(() => {
-    const storedLogin = localStorage.getItem("isLoggedIn");
-    if (storedLogin === "true") setIsLoggedIn(true);
-
-    const storedSearches = JSON.parse(localStorage.getItem("recentSearches")) || [];
-    setRecentSearches(storedSearches);
+    const stored = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    setRecentSearches(stored);
   }, []);
 
-  // ✅ Global click-outside handler
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (headerRef.current && !headerRef.current.contains(e.target)) {
@@ -55,15 +53,13 @@ const Header = ({ onSearch, onSearchReset }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ✅ Handle search + track analytics
-  const handleSearch = (term) => {
+  const performSearch = (term) => {
     if (!term.trim()) return;
-    setSearchTerm(term);
+
     const updated = [term, ...recentSearches.filter((t) => t !== term)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem("recentSearches", JSON.stringify(updated));
 
-    // 🔹 Log search event to analytics
     logEvent("Search", "Used Search", term);
 
     if (location.pathname !== "/") {
@@ -72,7 +68,20 @@ const Header = ({ onSearch, onSearchReset }) => {
     } else {
       onSearch && onSearch(term);
     }
+
     setSuggestionsVisible(false);
+    setIsSearchActive(false); // collapse after search
+  };
+
+  const handleSearchButton = () => {
+    if (isSearchActive) {
+      // Search bar expanded → perform search
+      if (searchTerm.trim()) performSearch(searchTerm);
+    } else {
+      // Search bar closed → expand
+      setIsSearchActive(true);
+      setSuggestionsVisible(true);
+    }
   };
 
   const handleVoiceSearch = () => {
@@ -80,6 +89,7 @@ const Header = ({ onSearch, onSearchReset }) => {
       alert("Voice search not supported on this browser");
       return;
     }
+
     const recognition = new window.webkitSpeechRecognition();
     recognition.lang = "en-US";
     recognition.interimResults = false;
@@ -88,32 +98,33 @@ const Header = ({ onSearch, onSearchReset }) => {
     recognition.onresult = (e) => {
       const text = e.results[0][0].transcript;
       setSearchTerm(text);
-      handleSearch(text);
+      performSearch(text);
       setVoiceOpen(false);
-
-      // 🔹 Log voice search
       logEvent("Search", "Voice Search", text);
     };
+
     recognition.onerror = () => setVoiceOpen(false);
 
     recognitionRef.current = recognition;
     recognition.start();
   };
 
-  const handleLogin = () => {
-    setIsLoggedIn(true);
-    localStorage.setItem("isLoggedIn", "true");
-
-    // 🔹 Track login
-    logEvent("User", "Login", "Success");
+  const handleLogin = async () => {
+    try {
+      const loggedUser = await signInWithGoogle();
+      setUser(loggedUser);
+      logEvent("User", "Login", "GoogleSuccess");
+    } catch (e) {
+      alert("Login failed");
+    }
   };
 
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem("isLoggedIn");
-
-    // 🔹 Track logout
-    logEvent("User", "Logout", "Manual");
+  const handleLogout = async () => {
+    try {
+      await signOutUser();
+      setUser(null);
+      logEvent("User", "Logout", "GoogleSignOut");
+    } catch (e) {}
   };
 
   const closeAllExcept = (target) => {
@@ -125,82 +136,108 @@ const Header = ({ onSearch, onSearchReset }) => {
   };
 
   return (
-    <>
-      <header className="header" ref={headerRef}>
-        {/* Menu */}
-        <button
-          className="icon-btn"
-          onClick={() => {
-            closeAllExcept("menu");
-            setMenuOpen((prev) => !prev);
+    <header className="header" ref={headerRef}>
+      {isSearchActive && (
+        <button className="icon-btn back-btn" onClick={() => { setIsSearchActive(false); setSearchTerm(""); setSuggestionsVisible(false); }}>
+          ←
+        </button>
+      )}
 
-            // 🔹 Track menu toggle
-            logEvent("Menu", "Toggle", !menuOpen ? "Open" : "Close");
-          }}
-        >
+      {!isSearchActive && (
+        <button className="icon-btn" onClick={() => {
+          closeAllExcept("menu");
+          setMenuOpen((prev) => !prev);
+        }}>
           ☰
         </button>
+      )}
 
-        {/* Title click behavior */}
-        <h1
-          className="title"
-          onClick={() => {
-            if (location.pathname !== "/") navigate("/");
-            else if (onSearchReset) onSearchReset();
-
-            // 🔹 Track home title click
-            logEvent("Navigation", "Home Click", "Header Title");
-          }}
-        >
+      {!isSearchActive && (
+        <h1 className="title" onClick={() => {
+          if (location.pathname !== "/") navigate("/");
+          else if (onSearchReset) onSearchReset();
+        }}>
           VPLEX.in
         </h1>
+      )}
 
-        {/* Search */}
-        <div className="search-bar">
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => {
-              closeAllExcept("search");
-              setSuggestionsVisible(true);
-            }}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch(searchTerm)}
-          />
-          <button className="search-btn" onClick={() => handleSearch(searchTerm)}>
-            🔍
+      {/* SEARCH BAR */}
+      <div className={`search-bar ${isSearchActive ? "active" : ""}`}>
+        <input
+          type="text"
+          placeholder="Search..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => {
+            setIsSearchActive(true);
+            setSuggestionsVisible(true);
+            closeAllExcept("search");
+          }}
+          onKeyDown={(e) => e.key === "Enter" && searchTerm.trim() && performSearch(searchTerm)}
+        />
+
+        <button className="search-btn" onClick={handleSearchButton}>
+          🔍
+        </button>
+
+        {suggestionsVisible && (
+          <div className="suggestion-box">
+            <div className="suggestion-section">
+              <p className="suggestion-title">Recent Searches</p>
+              {recentSearches.length === 0 && <p className="no-item">No recent searches</p>}
+              {recentSearches.map((r, i) => (
+                <p key={i} onClick={() => performSearch(r)}>{r}</p>
+              ))}
+            </div>
+
+            <div className="suggestion-section">
+              <p className="suggestion-title">Suggested</p>
+              {["Music", "Gaming", "News", "Movies", "Sports"].map((s, i) => (
+                <p key={i} onClick={() => performSearch(s)}>{s}</p>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT ICONS */}
+      {isSearchActive ? (
+        <button className="icon-btn" onClick={() => setVoiceOpen(true)}>🎤</button>
+      ) : (
+        <>
+          <button className="icon-btn" onClick={() => setVoiceOpen(true)}>🎤</button>
+
+          <button className="icon-btn" onClick={() => {
+            closeAllExcept("notify");
+            setNotificationsOpen((p) => !p);
+          }}>🔔</button>
+
+          <button className="icon-btn" onClick={() => {
+            closeAllExcept("profile");
+            setProfileOpen((p) => !p);
+          }}>
+            {isLoggedIn && user?.photoURL ? (
+              <img src={user.photoURL} style={{ width: "28px", height: "28px", borderRadius: "50%" }} />
+            ) : (
+              "👤"
+            )}
           </button>
 
-          {suggestionsVisible && (
-            <div className="suggestion-box">
-              <div className="suggestion-section">
-                <p className="suggestion-title">Recent Searches</p>
-                {recentSearches.length === 0 && <p className="no-item">No recent searches</p>}
-                {recentSearches.map((r, i) => (
-                  <p key={i} onClick={() => handleSearch(r)}>
-                    {r}
-                  </p>
-                ))}
-              </div>
-              <div className="suggestion-section">
-                <p className="suggestion-title">Suggested</p>
-                {["Music", "Gaming", "News", "Movies", "Sports"].map((s, i) => (
-                  <p key={i} onClick={() => handleSearch(s)}>
-                    {s}
-                  </p>
-                ))}
-              </div>
+          {profileOpen && (
+            <div className="profile-menu">
+              {isLoggedIn ? (
+                <>
+                  <p style={{ color: "#0ff", fontSize: "14px" }}>{user.displayName}</p>
+                  <button onClick={handleLogout}>Logout</button>
+                </>
+              ) : (
+                <button onClick={handleLogin}>Login with Google</button>
+              )}
             </div>
           )}
-        </div>
-
-        {/* Other buttons unchanged */}
-        <button className="icon-btn" onClick={() => { closeAllExcept("voice"); setVoiceOpen(true); }}>🎤</button>
-        <button className="icon-btn" onClick={() => { closeAllExcept("notify"); setNotificationsOpen((p) => !p); }}>🔔</button>
-        <button className="icon-btn" onClick={() => { closeAllExcept("profile"); setProfileOpen((p) => !p); }}>👤</button>
-      </header>
-    </>
+        </>
+      )}
+    </header>
   );
 };
 

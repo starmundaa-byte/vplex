@@ -1,0 +1,29 @@
+.watch-mobile { 
+  padding-top: 60px;
+  background-color: #0f0f0f;
+  color: white;
+  min-height: 100vh;
+}
+
+/* Sticky player */
+.player-section {
+  position: sticky;
+  top: 60px;
+  z-index: 20;
+  background-color: #0f0f0f; /* Makes content scroll under it */
+  margin-bottom: 12px; /* Space so content scrolls smoothly */
+}
+
+/* All sections */
+.video-details,
+.video-actions,
+.comments-section,
+.related-videos {
+  padding: 12px;
+}
+
+/* Fix: Make related videos slide under player */
+.related-videos {
+  position: relative;
+  z-index: 1;
+}

@@ -5,212 +5,311 @@ import axios from "axios";
    🔑 Multi API Key Rotation Setup
 ------------------------------------------- */
 const API_KEYS = [
-  "AIzaSyDK2hOXZ3QAIeUGy76Niztl26V0oJ2_eKE",
-"AIzaSyDzVHTgfXFIl8FMlQY0QcN8OGqekctwUjw",
-"AIzaSyCxHN_LvucVaJXAnlgABDM78nbTBVP1Ios",
-"AIzaSyC0L6TpJCXYRMKF-yaNMmmcKhp6jM9_6bQ",
-"AIzaSyCgo8_8IpG2mMSRraizEEoWrNVcl8q66Wo",
-"AIzaSyCROYQ4uSDQTGSCB4loSspP99uOC3bG74g",
-"AIzaSyCi2F4oh6co_0TD7mA6sPFLgNgf6wUb218",
-"AIzaSyA8JZTg7ZLNAHcxKi9xiKGBhmdC9qzU63c",
-"AIzaSyA16JmAWY6XsindWF4L11L7yIL2ciI9dU8"
-
-  // ➕ add as many as you have
+"AIzaSyC-uwwoegGzxr4-Hk4B7aMrEw-znrYJNTs"
+  // add more keys if needed
 ];
+
 let currentKeyIndex = 0;
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 const getKey = () => API_KEYS[currentKeyIndex];
 const switchKey = () => {
   currentKeyIndex = (currentKeyIndex + 1) % API_KEYS.length;
-  console.warn(`⏩ Switched to next YouTube API key (#${currentKeyIndex + 1})`);
+  console.warn(`⏩ Switched to API key #${currentKeyIndex + 1}`);
 };
 
 /* -------------------------------------------
-   🧠 Helper: Fetch channel logos
+   🧪 API GET with automatic key rotation
+------------------------------------------- */
+const apiGet = async (endpoint, params = {}) => {
+  for (let attempt = 0; attempt < API_KEYS.length; attempt++) {
+    try {
+      const res = await axios.get(`${BASE_URL}/${endpoint}`, {
+        params: { ...params, key: getKey() },
+      });
+      return res.data;
+    } catch (err) {
+      const code = err.response?.status;
+      console.warn(`⚠️ API error on key #${currentKeyIndex + 1} (${code})`);
+
+      if (code === 400 || code === 403 || code === 429) {
+        switchKey();
+        continue;
+      }
+
+      throw err;
+    }
+  }
+  throw new Error("All YouTube API keys exhausted");
+};
+
+/* -------------------------------------------
+   🔆 Fake Duration Generator
+------------------------------------------- */
+const generateFakeDuration = (title, realDuration = "") => {
+  const t = title.toLowerCase();
+
+  const IS_MOVIE =
+    t.includes("movie") ||
+    t.includes("full movie") ||
+    t.includes("film") ||
+    t.includes("cinema") ||
+    t.includes("trailer") ||
+    realDuration.includes("H");
+
+  if (IS_MOVIE) {
+    // 🎬 1.5–2.5 hours
+    const hours = 1;
+    const minutes = 30 + Math.floor(Math.random() * 60);
+    const seconds = Math.floor(Math.random() * 60);
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  }
+
+  // 📺 5–20 minutes
+  const minutes = 5 + Math.floor(Math.random() * 15);
+  const seconds = Math.floor(Math.random() * 60);
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};
+
+/* -------------------------------------------
+   🧠 Fetch Channel Logo
 ------------------------------------------- */
 const fetchChannelLogos = async (channelIds = []) => {
   if (!channelIds.length) return {};
 
-  for (let attempt = 0; attempt < API_KEYS.length; attempt++) {
-    try {
-      const { data } = await axios.get(`${BASE_URL}/channels`, {
-        params: {
-          part: "snippet",
-          id: channelIds.join(","),
-          key: getKey(),
-        },
-      });
+  try {
+    const data = await apiGet("channels", {
+      part: "snippet",
+      id: channelIds.join(","),
+    });
 
-      const logos = {};
-      data.items?.forEach((ch) => {
-        logos[ch.id] = ch.snippet.thumbnails.default.url;
-      });
+    const map = {};
+    data.items?.forEach((c) => {
+      map[c.id] = c.snippet?.thumbnails?.default?.url || "";
+    });
 
-      return logos;
-    } catch (err) {
-      console.error("⚠️ Failed to fetch channel logos:", err.message);
-      if (err.response?.status === 403) switchKey();
-      else break;
-    }
+    return map;
+  } catch (err) {
+    return {};
   }
-  return {};
 };
 
 /* -------------------------------------------
-   📺 Fetch YouTube videos by query
+   ⚙ Normalize Items (safe id extraction)
+------------------------------------------- */
+const normalizeItem = (v) => {
+  const id =
+    v.id?.videoId ||
+    v.id ||
+    v.resourceId?.videoId ||
+    v.contentDetails?.videoId ||
+    null;
+
+  return {
+    id,
+    title: v.snippet?.title || "",
+    channelId: v.snippet?.channelId || "",
+    channelTitle: v.snippet?.channelTitle || "",
+    thumbnail:
+      v.snippet?.thumbnails?.medium?.url ||
+      v.snippet?.thumbnails?.default?.url ||
+      "",
+    publishedAt: v.snippet?.publishedAt || "",
+    raw: v,
+  };
+};
+
+/* -------------------------------------------
+   📺 Fetch YouTube Videos (Home Page)
 ------------------------------------------- */
 export const fetchYoutubeVideos = async (query = "latest", regionCode = "IN") => {
-  for (let attempt = 0; attempt < API_KEYS.length; attempt++) {
-    try {
-      console.log(`🔑 Using API key #${currentKeyIndex + 1}`);
-      const { data } = await axios.get(`${BASE_URL}/search`, {
-        params: {
-          part: "snippet",
-          q: query,
-          maxResults: 30,
-          regionCode,
-          type: "video",
-          videoEmbeddable: "true",
-          key: getKey(),
-        },
-      });
+  try {
+    const data = await apiGet("search", {
+      part: "snippet",
+      q: query,
+      type: "video",
+      maxResults: 30,
+      regionCode,
+      videoEmbeddable: "true",
+      safeSearch: "none",
+    });
 
-      const videos = data.items || [];
+    const items = data.items.map(normalizeItem);
+    const channelMap = await fetchChannelLogos(
+      [...new Set(items.map((v) => v.channelId))]
+    );
 
-      // 🔹 Fetch channel logos in batch
-      const channelIds = [...new Set(videos.map((v) => v.snippet.channelId))];
-      const channelMap = await fetchChannelLogos(channelIds);
-
-      return videos.map((v) => ({
-        id: v.id.videoId,
-        title: v.snippet.title,
-        thumbnail: v.snippet.thumbnails.medium.url,
-        channelTitle: v.snippet.channelTitle,
-        channelLogo: channelMap[v.snippet.channelId] || null,
-        publishedAt: v.snippet.publishedAt,
-        views: Math.floor(Math.random() * 500000),
-        duration: `${Math.floor(Math.random() * 10)}:${Math.floor(Math.random() * 60)
-          .toString()
-          .padStart(2, "0")}`,
-      }));
-    } catch (error) {
-      console.warn(`❌ API key ${getKey()} failed:`, error.response?.status);
-      if (error.response?.status === 403) switchKey();
-      else break;
-    }
-  }
-
-  console.error("🚫 All YouTube API keys exhausted.");
-  return [];
-};
-
-/* -------------------------------------------
-   🎯 Fetch Related / Recommended Videos
-------------------------------------------- */
-export const fetchRelatedVideos = async (videoId, fallbackQuery = "trending") => {
-  if (!videoId) {
-    console.warn("⚠️ Missing videoId in fetchRelatedVideos()");
+    return items.map((v) => ({
+      ...v,
+      channelLogo: channelMap[v.channelId] || null,
+      duration: generateFakeDuration(v.title),
+      views: Math.floor(Math.random() * 900000),
+    }));
+  } catch (err) {
+    console.error("Home API failed:", err);
     return [];
   }
-
-  console.log(`▶️ Fetching related videos for: ${videoId}`);
-
-  for (let attempt = 0; attempt < API_KEYS.length; attempt++) {
-    try {
-      const { data } = await axios.get(`${BASE_URL}/search`, {
-        params: {
-          part: "snippet",
-          relatedToVideoId: videoId,
-          type: "video",
-          maxResults: 20,
-          videoEmbeddable: "true",
-          safeSearch: "none",
-          key: getKey(),
-        },
-      });
-
-      let videos = data.items || [];
-
-      // 🧭 Fallback to trending query if no related results
-      if (videos.length === 0) {
-        console.warn("⚠️ No related videos, fetching fallback query...");
-        const { data: fallback } = await axios.get(`${BASE_URL}/search`, {
-          params: {
-            part: "snippet",
-            q: fallbackQuery,
-            type: "video",
-            maxResults: 20,
-            videoEmbeddable: "true",
-            key: getKey(),
-          },
-        });
-        videos = fallback.items || [];
-      }
-
-      // 🔹 Fetch logos
-      const channelIds = [...new Set(videos.map((v) => v.snippet.channelId))];
-      const channelMap = await fetchChannelLogos(channelIds);
-
-      return videos.map((v) => ({
-        id: v.id.videoId,
-        title: v.snippet.title,
-        thumbnail: v.snippet.thumbnails.medium.url,
-        channelTitle: v.snippet.channelTitle,
-        channelLogo: channelMap[v.snippet.channelId] || null,
-        publishedAt: v.snippet.publishedAt,
-        views: Math.floor(Math.random() * 500000),
-      }));
-    } catch (error) {
-      console.warn(`❌ Related video fetch failed with ${getKey()}`);
-      if (error.response?.status === 403) switchKey();
-      else break;
-    }
-  }
-
-  console.error("🚫 All YouTube API keys exhausted (related videos).");
-  return [];
 };
 
 /* -------------------------------------------
-   🎬 Fetch Single Video by ID
+   🎬 Fetch Single Video
 ------------------------------------------- */
 export const fetchVideoById = async (videoId) => {
   if (!videoId) return null;
 
-  for (let attempt = 0; attempt < API_KEYS.length; attempt++) {
+  try {
+    const data = await apiGet("videos", {
+      part: "snippet,statistics,contentDetails",
+      id: videoId,
+    });
+
+    const v = data.items?.[0];
+    if (!v) return null;
+
+    return {
+      id: v.id,
+      title: v.snippet.title,
+      description: v.snippet.description,
+      channelTitle: v.snippet.channelTitle,
+      channelId: v.snippet.channelId,
+      categoryId: v.snippet.categoryId,
+      publishedAt: v.snippet.publishedAt,
+      views: v.statistics?.viewCount || 0,
+      channelLogo: v.snippet?.thumbnails?.default?.url || "",
+      duration: generateFakeDuration(v.snippet.title, v.contentDetails?.duration),
+    };
+  } catch {
+    return null;
+  }
+};
+
+/* -------------------------------------------
+   👥 Channel Details
+------------------------------------------- */
+export const fetchChannelDetails = async (channelId) => {
+  if (!channelId) return null;
+
+  try {
+    const data = await apiGet("channels", {
+      part: "snippet,statistics",
+      id: channelId,
+    });
+
+    const c = data.items?.[0];
+    if (!c) return null;
+
+    return {
+      logo: c.snippet?.thumbnails?.default?.url || "",
+      subscribers: c.statistics?.subscriberCount || 0,
+    };
+  } catch {
+    return null;
+  }
+};
+
+/* -------------------------------------------
+   🎯 Smart Related Videos (clickable & autoplay)
+------------------------------------------- */
+export const fetchRelatedVideos = async (videoId, limit = 10) => {
+  if (!videoId) return [];
+
+  try {
+    const main = await fetchVideoById(videoId);
+
+    const steps = [];
+
+    // Step 1 → Directly related vids
     try {
-      const { data } = await axios.get(`${BASE_URL}/videos`, {
-        params: {
-          part: "snippet,statistics,contentDetails",
-          id: videoId,
-          key: getKey(),
-        },
+      const s = await apiGet("search", {
+        part: "snippet",
+        relatedToVideoId: videoId,
+        type: "video",
+        maxResults: 20,
+        videoEmbeddable: "true",
+      });
+      steps.push(s.items.map(normalizeItem));
+    } catch {}
+
+    // Step 2 → Same category
+    if (main?.categoryId) {
+      try {
+        const s = await apiGet("videos", {
+          part: "snippet",
+          chart: "mostPopular",
+          regionCode: "IN",
+          videoCategoryId: main.categoryId,
+          maxResults: 12,
+        });
+
+        steps.push(
+          s.items.map((v) =>
+            normalizeItem({ id: v.id, snippet: v.snippet })
+          )
+        );
+      } catch {}
+    }
+
+    // Step 3 → Title keywords
+    try {
+      const kw = main.title
+        .replace(/[^a-zA-Z0-9 ]/g, " ")
+        .split(" ")
+        .filter((w) => w.length > 3)
+        .slice(0, 5)
+        .join(" ");
+
+      const s = await apiGet("search", {
+        part: "snippet",
+        type: "video",
+        q: kw || main.title,
+        maxResults: 15,
+        videoEmbeddable: "true",
       });
 
-      const item = data.items?.[0];
-      if (!item) return null;
+      steps.push(s.items.map(normalizeItem));
+    } catch {}
 
-      return {
-        id: item.id,
-        title: item.snippet.title,
-        description: item.snippet.description,
-        channelTitle: item.snippet.channelTitle,
-        channelId: item.snippet.channelId,
-        publishedAt: item.snippet.publishedAt,
-        views: item.statistics?.viewCount || 0,
-        channelLogo: `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          item.snippet.channelTitle
-        )}`,
-        duration: item.contentDetails?.duration || "0:00",
-      };
-    } catch (error) {
-      console.warn(`❌ Video fetch failed with key ${getKey()}`);
-      if (error.response?.status === 403) switchKey();
-      else break;
+    // Step 4 → Same channel
+    if (main?.channelId) {
+      try {
+        const s = await apiGet("search", {
+          part: "snippet",
+          type: "video",
+          channelId: main.channelId,
+          order: "date",
+          maxResults: 15,
+        });
+        steps.push(s.items.map(normalizeItem));
+      } catch {}
     }
-  }
 
-  console.error("🚫 All API keys failed for fetchVideoById.");
-  return null;
+    // Merge + dedupe
+    const seen = new Set();
+    const merged = [];
+
+    for (const arr of steps) {
+      for (const v of arr) {
+        if (v.id && !seen.has(v.id)) {
+          seen.add(v.id);
+          merged.push(v);
+        }
+        if (merged.length >= limit) break;
+      }
+    }
+
+    const channelMap = await fetchChannelLogos(
+      [...new Set(merged.map((v) => v.channelId))]
+    );
+
+    return merged.map((v) => ({
+      ...v,
+      channelLogo: channelMap[v.channelId] || null,
+      duration: generateFakeDuration(v.title),
+      views: Math.floor(Math.random() * 800000 + 15000),
+    }));
+  } catch {
+    return [];
+  }
 };

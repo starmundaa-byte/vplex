@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchVideoById, fetchRelatedVideos } from "../../api/youtubeAPI";
-import WatchLongMobile from "./WatchLongMobile";
-import WatchLongDesktop from "./WatchLongDesktop";
+import WatchMobile from "./WatchMobile";
+import WatchDesktop from "./WatchDesktop";
 import "../../styles/WatchPage.css";
 
 export default function WatchPage() {
@@ -14,7 +14,6 @@ export default function WatchPage() {
   const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 800);
 
-  // Handle responsive switch
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 800);
     window.addEventListener("resize", handleResize);
@@ -22,36 +21,34 @@ export default function WatchPage() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    let cancel = false;
 
-    const load = async () => {
+    const loadData = async () => {
       setLoading(true);
       try {
-        // Fetch main video using centralized API
-        const mainVideo = await fetchVideoById(id);
-        if (!cancelled && mainVideo) setVideo(mainVideo);
-
-        // Fetch related videos using centralized API
-        const relVideos = await fetchRelatedVideos(id, mainVideo?.title || "trending");
-        if (!cancelled) setRelated(relVideos || []);
+        const vid = await fetchVideoById(id);
+        const rel = await fetchRelatedVideos(id);
+        if (!cancel) {
+          setVideo(vid);
+          setRelated(rel);
+        }
       } catch (err) {
-        console.error("Error fetching video:", err);
+        console.error("Error loading video:", err);
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancel) setLoading(false);
       }
     };
 
-    if (id) load();
-    return () => (cancelled = true);
+    if (id) loadData();
+    return () => (cancel = true);
   }, [id]);
 
-  if (!id) return <div className="watchpage-wrapper">No video selected.</div>;
   if (loading) return <div className="watchpage-wrapper">Loading...</div>;
-  if (!video) return <div className="watchpage-wrapper">Video not found.</div>;
+  if (!video) return <div className="watchpage-wrapper">Video not found</div>;
 
   return isMobile ? (
-    <WatchLongMobile video={video} related={related} />
+    <WatchMobile video={video} related={related} navigate={navigate} />
   ) : (
-    <WatchLongDesktop video={video} related={related} navigate={navigate} />
+    <WatchDesktop video={video} related={related} navigate={navigate} />
   );
 }

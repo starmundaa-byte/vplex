@@ -1,49 +1,48 @@
-.video-details-container {
+.video-details {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  gap: 4px;
   color: #fff;
-  margin-top: 12px;
-  padding: 0 10px;
 }
 
-/* Title */
 .video-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 6px;
-  line-height: 1.3em;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.3;
 }
 
-/* Views + Time */
 .video-meta {
-  font-size: 14px;
+  font-size: 13px;
   color: #aaa;
-  margin-bottom: 12px;
+  margin: 0;
 }
 
-/* Channel row */
 .channel-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  gap: 10px;
+  margin-top: 4px;
+  padding: 0;
 }
 
 .channel-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .channel-logo {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
 }
 
-.channel-text {
-  display: flex;
-  flex-direction: column;
+.channel-text p {
+  margin: 0;
+  line-height: 1.2;
 }
 
 .channel-name {
@@ -56,121 +55,130 @@
   color: #aaa;
 }
 
-/* Subscribe Button */
 .subscribe-btn {
-  background: #cc0000;
-  color: #fff;
+  background: #eb1f04;
   border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: 600;
+  border-radius: 16px;
+  color: white;
+  padding: 6px 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.2s ease;
 }
 
 .subscribe-btn.subscribed {
-  background: #444;
-  color: #fff;
+  background: #333;
+  color: #00c853;
 }
 
-.subscribe-btn:hover {
-  opacity: 0.9;
-}
-
-/* Action buttons */
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.action-btn {
-  background: transparent;
-  border: none;
-  color: #ccc;
-  cursor: pointer;
-  font-size: 14px;
+/* --- actions bar --- */
+.action-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
-  transition: color 0.3s;
-}
-
-.action-btn.active,
-.action-btn:hover {
-  color: #00b3ff;
-}
-
-/* Comment box */
-.comment-section {
-  display: flex;
-  align-items: center;
+  justify-content: flex-start;
+  margin-top: 4px;
   gap: 10px;
 }
 
-.comment-section input {
-  flex: 1;
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  outline: none;
-}
-
-.comment-section button {
-  background: #00b3ff;
-  color: #fff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-}
-
-/* 📱 Mobile & Tablet: ensure subscribe stays in same row */
-@media (max-width: 799px) {
-  .channel-row {
-    flex-wrap: nowrap;
-  }
-  .channel-info {
-    flex: 1;
-  }
-  .subscribe-btn {
-    white-space: nowrap;
-  }
-}
-
-/* Share Dropdown */
-.share-dropdown {
-  position: relative;
-}
-
-.share-menu {
-  position: absolute;
-  top: 120%;
-  right: 0;
-  background: #222;
-  border-radius: 6px;
-  padding: 6px 0;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  z-index: 50;
-}
-
-.share-menu button {
-  background: none;
-  border: none;
-  color: #fff;
-  text-align: left;
-  padding: 8px 12px;
+.actions-left {
   display: flex;
   align-items: center;
   gap: 8px;
-  cursor: pointer;
-  width: 150px;
 }
 
-.share-menu button:hover {
+.action-btn {
+  background: #222;
+  border: none;
+  border-radius: 20px;
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.2s ease;
+}
+
+.action-btn:hover {
   background: #333;
-  color: #00b3ff;
+}
+
+.action-btn.active {
+  background: #444;
+  color: #00c853;
+}
+
+/* share dropdown */
+.share-section {
+  position: relative;
+}
+
+.share-dropdown {
+  position: absolute;
+  top: 32px;
+  left: 0;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 10;
+}
+
+.share-dropdown a,
+.share-dropdown button {
+  color: #fff;
+  font-size: 13px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.share-dropdown a:hover,
+.share-dropdown button:hover {
+  color: #00c853;
+}
+
+/* SHARE DROPDOWN FIXED UI */
+.share-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #181818;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 50;
+  width: 160px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.6);
+}
+
+/* One-row layout: icon + text */
+.share-dropdown a,
+.share-dropdown button {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+
+  text-decoration: none; /* ← Removes underline */
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Hover effect */
+.share-dropdown a:hover,
+.share-dropdown button:hover {
+  background: #333;
 }

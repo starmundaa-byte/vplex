@@ -1,0 +1,85 @@
+/* ===== Comment Input Section ===== */
+.comment-input-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: #fff;
+  padding: 10px 14px;
+  border-bottom: 1px solid #222;
+}
+
+.comment-input-container.no-avatar {
+  padding-left: 14px;
+}
+
+.comment-input-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 25px;
+  padding: 6px 12px;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.comment-input-box.active {
+  border-color: #0a84ff;
+  box-shadow: 0 0 4px #0a84ff88;
+}
+
+.comment-input-box input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  padding: 8px 10px;
+}
+
+.post-btn {
+  background: #333;
+  color: #888;
+  border: none;
+  border-radius: 20px;
+  padding: 6px 16px;
+  font-size: 13px;
+  cursor: not-allowed;
+  transition: all 0.2s ease;
+}
+
+.post-btn.enabled {
+  background: #0a84ff;
+  color: #fff;
+  cursor: pointer;
+}
+
+.post-btn.enabled:hover {
+  background: #006fe6;
+}
+
+/* ===== Existing Comment List ===== */
+.comments-section {
+  padding: 10px 14px;
+  color: #fff;
+}
+
+.comments-section h3 {
+  margin-bottom: 8px;
+}
+
+.comment {
+  margin-bottom: 10px;
+}
+
+.comment strong {
+  display: block;
+  color: #fff;
+}
+
+.comment p {
+  color: #aaa;
+  font-size: 14px;
+}

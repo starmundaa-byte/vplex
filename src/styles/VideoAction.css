@@ -1,0 +1,110 @@
+.video-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 2px 0 0;
+  position: relative;
+}
+
+.video-actions button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #222;
+  border: none;
+  color: #fff;
+  font-size: 12.5px;
+  padding: 5px 10px;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.video-actions button:hover {
+  background: #333;
+}
+
+.video-actions button.active {
+  background: #0a84ff;
+  color: #fff;
+}
+
+/* Subscribe state */
+.subscribe-btn.subscribed {
+  background: #00c853;
+  color: #fff;
+}
+
+/* Share dropdown */
+.share-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #181818;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  z-index: 5;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+/* Shared style for both <a> and <button> */
+.share-dropdown a,
+.share-dropdown button {
+  display: flex;
+  align-items: center;
+  flex-direction: row;  /* ensures icon + text same row */
+  gap: 10px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #fff;
+  text-decoration: none !important; /* removes underline */
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Hover */
+.share-dropdown a:hover,
+.share-dropdown button:hover {
+  background: #333;
+}
+
+/* FORCE FIX SHARE DROPDOWN — FINAL */
+.share-dropdown {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  width: 160px;
+  background: #181818 !important;
+  padding: 6px 0 !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  z-index: 999 !important;
+}
+
+/* FORCE <a> + <button> SAME ROW, NO UNDERLINE */
+.share-dropdown a,
+.share-dropdown button {
+  display: flex !important;
+  align-items: center !important;
+  flex-direction: row !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  color: #fff !important;
+  text-decoration: none !important; /* removes underline */
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  border-radius: 6px !important;
+}
+
+/* Hover effect */
+.share-dropdown a:hover,
+.share-dropdown button:hover {
+  background: #333 !important;
+}

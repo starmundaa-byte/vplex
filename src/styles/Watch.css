@@ -1,24 +1,42 @@
 .watch-page {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
   background: #000;
-  height: 100vh;
+  min-height: 100vh;
   width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
 }
 
-.watch-player-container {
-  position: relative;
-  width: 90%;
-  max-width: 1000px;
+/* Player */
+.player-container {
+  width: 100%;
   aspect-ratio: 16 / 9;
-  border-radius: 10px;
+  position: sticky;
+  top: 60px; /* below header if you have one */
+  border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-.watch-player-container iframe {
+.player-container iframe {
   width: 100%;
   height: 100%;
   border: none;
+  border-radius: 12px;
+}
+
+/* For mobile: remove sticky */
+@media (max-width: 800px) {
+  .player-container {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* Placeholder section (for now) */
+.video-details-placeholder {
+  margin-top: 20px;
+  text-align: center;
+  color: #aaa;
 }
