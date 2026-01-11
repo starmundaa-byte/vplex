@@ -22,7 +22,6 @@ const API_KEYS = [
 "AIzaSyDOc3vEhibO9bAVpIhkVPJBab9MPRaT480",
 "AIzaSyD9Nytt0BpmnY1OUjlZjhlzWAT2GzOG36E",
 "AIzaSyA7y74bWAfYcY3QqvB9nkkuFrfQIOm90S0",       
-"AIzaSyDU6-dQH0Qs_nJULWW8zv1ZS39TK4T5gMc",
 "AIzaSyBLLGGLMi8Qz_4NTFJ65AaNTM8g-j0tZ2o",
 "AIzaSyC-uwwoegGzxr4-Hk4B7aMrEw-znrYJNTs",
 
