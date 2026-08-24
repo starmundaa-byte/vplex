@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import "../styles/Category.css";
 
 const categories = [
@@ -6,19 +6,30 @@ const categories = [
   "Technology", "Education", "Travel", "Fashion", "Comedy", "Food", "Science"
 ];
 
-const CategoryBar = ({ onCategoryChange, resetTrigger }) => {
+const CategoryBar = forwardRef(({ onCategoryChange, resetTrigger }, ref) => {
   const [active, setActive] = useState("All");
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(false);
   const scrollRef = useRef(null);
 
+  // ✅ Expose resetToAll method to parent components
+  useImperativeHandle(ref, () => ({
+    resetToAll: () => {
+      setActive("All");
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
+      }
+      if (onCategoryChange) onCategoryChange("All");
+    }
+  }));
+
   // ✅ Reset when user searches or page refresh
   useEffect(() => {
     setActive("All");
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({ left: 0, behavior: "smooth" }); // scroll back to start
+      scrollRef.current.scrollTo({ left: 0, behavior: "smooth" });
     }
-    if (onCategoryChange) onCategoryChange("All"); // show all videos again
+    if (onCategoryChange) onCategoryChange("All");
   }, [resetTrigger]);
 
   const checkScroll = () => {
@@ -73,6 +84,6 @@ const CategoryBar = ({ onCategoryChange, resetTrigger }) => {
       )}
     </div>
   );
-};
+});
 
 export default CategoryBar;

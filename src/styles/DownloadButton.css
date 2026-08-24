@@ -1,0 +1,604 @@
+/* ===== HEADER COMPACT DOWNLOAD BUTTON ===== */
+.header-download-btn-compact {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px 6px 10px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+    margin: 0 4px;
+    position: relative;
+}
+
+.header-download-btn-compact:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.header-download-btn-compact:active {
+    transform: scale(0.95);
+}
+
+.header-download-btn-compact .download-icon {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.3s ease;
+}
+
+.header-download-btn-compact:hover .download-icon {
+    transform: translateY(2px);
+}
+
+.header-download-btn-compact .download-text {
+    font-size: 12px;
+    letter-spacing: 0.3px;
+}
+
+/* ===== DOWNLOAD POPUP - FULL SCREEN FIXED ===== */
+.download-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 99999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.25s ease;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.download-popup {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    border-radius: 24px;
+    padding: 35px 40px 30px;
+    max-width: 580px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+    animation: slideUp 0.3s ease;
+    margin: auto;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Custom scrollbar for popup */
+.download-popup::-webkit-scrollbar {
+    width: 4px;
+}
+
+.download-popup::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.download-popup::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.3);
+    border-radius: 10px;
+}
+
+.popup-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: #888;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-close:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: rotate(90deg);
+}
+
+/* ===== POPUP HEADER WITH VPLEX LOGO ===== */
+.popup-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.popup-header .popup-logo {
+    width: 64px;
+    height: 64px;
+    object-fit: contain;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.popup-header .popup-logo:hover {
+    transform: rotate(-5deg) scale(1.05);
+}
+
+.popup-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+}
+
+.popup-header p {
+    color: #888;
+    font-size: 14px;
+    margin: 0;
+}
+
+/* ===== SHARE WEBSITE SECTION ===== */
+.share-website-section {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.12));
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.share-website-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 50%, rgba(102, 126, 234, 0.05), transparent 60%);
+    animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% {
+        transform: translateX(-20%) rotate(0deg);
+    }
+    50% {
+        transform: translateX(20%) rotate(5deg);
+    }
+}
+
+.share-website-section:hover {
+    border-color: rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 25px rgba(102, 126, 234, 0.1);
+    transform: translateY(-2px);
+}
+
+.share-website-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ===== FRIENDS ICON (Left side) ===== */
+.share-website-friends-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    animation: pulseFriends 3s ease-in-out infinite;
+}
+
+@keyframes pulseFriends {
+    0%, 100% {
+        transform: scale(1) rotate(0deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(-5deg);
+    }
+}
+
+.share-website-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.share-website-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.3px;
+}
+
+.share-website-desc {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.3;
+}
+
+/* ===== SHARE BUTTON WITH VPLEX LOGO ===== */
+.share-website-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.share-website-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+}
+
+.share-website-btn:active {
+    transform: scale(0.95);
+}
+
+/* VPlex Logo inside button */
+.share-website-btn .share-btn-logo {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    border-radius: 4px;
+    transition: transform 0.3s ease;
+}
+
+.share-website-btn:hover .share-btn-logo {
+    transform: rotate(-8deg) scale(1.1);
+}
+
+/* ===== PLATFORM CARDS ===== */
+.popup-platforms {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.platform-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 14px;
+    padding: 18px 16px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.platform-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(102, 126, 234, 0.3);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.platform-card .platform-icon {
+    font-size: 36px;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.platform-card h3 {
+    color: #fff;
+    font-size: 15px;
+    margin: 0 0 2px 0;
+}
+
+.platform-card p {
+    color: #888;
+    font-size: 12px;
+    margin: 0 0 10px 0;
+}
+
+.platform-card .download-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 5px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.platform-card.android .download-badge {
+    background: linear-gradient(135deg, #34a853, #2d9248);
+}
+
+.platform-card.windows .download-badge {
+    background: linear-gradient(135deg, #0078d4, #0066b3);
+}
+
+.platform-card.coming-soon {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.platform-card.coming-soon:hover {
+    transform: none;
+    border-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.platform-card .coming-badge {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.08);
+    color: #666;
+    padding: 5px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+/* ===== POPUP FOOTER ===== */
+.popup-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: #666;
+    font-size: 12px;
+}
+
+.popup-footer .divider {
+    color: #333;
+}
+
+.popup-footer .free {
+    color: #10b981;
+}
+
+.popup-footer .secure {
+    color: #667eea;
+}
+
+/* ===== RECOMMENDATION ===== */
+.recommendation {
+    margin-top: 14px;
+    padding: 10px 16px;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 10px;
+    text-align: center;
+    color: #aaa;
+    font-size: 13px;
+    border: 1px solid rgba(102, 126, 234, 0.1);
+}
+
+.recommendation strong {
+    color: #667eea;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .header-download-btn-compact {
+        padding: 5px 10px 5px 8px;
+        font-size: 12px;
+    }
+    
+    .header-download-btn-compact .download-text {
+        font-size: 11px;
+    }
+    
+    .header-download-btn-compact .download-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .download-popup {
+        padding: 25px 20px 20px;
+        max-width: 95%;
+        max-height: 80vh;
+    }
+    
+    .popup-header h2 {
+        font-size: 20px;
+    }
+    
+    .popup-header .popup-logo {
+        width: 50px;
+        height: 50px;
+    }
+
+    .share-website-section {
+        padding: 12px 14px;
+        margin-bottom: 16px;
+    }
+
+    .share-website-content {
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .share-website-friends-icon {
+        font-size: 28px;
+    }
+
+    .share-website-title {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .share-website-desc {
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .share-website-text {
+        align-items: center;
+        width: 100%;
+    }
+
+    .share-website-btn {
+        padding: 7px 16px;
+        font-size: 12px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .share-website-btn .share-btn-logo {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-download-btn-compact {
+        padding: 4px 8px;
+        border-radius: 50%;
+        min-width: 34px;
+        min-height: 34px;
+        justify-content: center;
+    }
+    
+    .header-download-btn-compact .download-text {
+        display: none;
+    }
+    
+    .header-download-btn-compact .download-icon {
+        width: 16px;
+        height: 16px;
+        margin: 0;
+    }
+    
+    .popup-platforms {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .download-popup {
+        padding: 20px 16px 16px;
+        max-height: 75vh;
+    }
+    
+    .popup-header .popup-icon {
+        font-size: 36px;
+    }
+    
+    .popup-header h2 {
+        font-size: 18px;
+    }
+    
+    .platform-card {
+        padding: 14px;
+    }
+    
+    .platform-card .platform-icon {
+        font-size: 30px;
+    }
+    
+    .popup-header .popup-logo {
+        width: 44px;
+        height: 44px;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-download-btn-compact {
+        min-width: 30px;
+        min-height: 30px;
+        padding: 3px 6px;
+    }
+    
+    .header-download-btn-compact .download-icon {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .download-popup {
+        padding: 16px 12px 14px;
+        max-height: 70vh;
+        max-width: 98%;
+    }
+    
+    .popup-close {
+        top: 8px;
+        right: 10px;
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+    
+    .popup-header .popup-logo {
+        width: 36px;
+        height: 36px;
+    }
+
+    .share-website-section {
+        padding: 10px 12px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+    }
+
+    .share-website-friends-icon {
+        font-size: 24px;
+    }
+
+    .share-website-title {
+        font-size: 13px;
+    }
+
+    .share-website-desc {
+        font-size: 10px;
+    }
+
+    .share-website-btn {
+        padding: 6px 14px;
+        font-size: 11px;
+    }
+
+    .share-website-btn .share-btn-logo {
+        width: 16px;
+        height: 16px;
+    }
+}

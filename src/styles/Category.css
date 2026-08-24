@@ -1,74 +1,132 @@
+/* =====================================================
+                VPLEX CATEGORY BAR
+===================================================== */
+
 .category-bar-container {
   position: sticky;
-  top: 50px; /* right below header */
-  width: 100vw;
-  background: #181818;
+  top: 45px; /* Match header height */
+  width: 100%;
+  height: 56px;
   display: flex;
   align-items: center;
-  overflow: hidden;
-  padding: 5px 0;
+  background: #0f0f0f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   z-index: 999;
+  padding: 0 10px;
 }
 
+/* =============================== */
 .category-bar {
+  flex: 1;
   display: flex;
+  align-items: center;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
-  scrollbar-width: none; /* hide scrollbar (Firefox) */
+  scrollbar-width: none;
+  padding: 0 5px;
+  gap: 8px;
 }
 
 .category-bar::-webkit-scrollbar {
-  display: none; /* hide scrollbar (Chrome/Safari) */
+  display: none;
 }
 
+/* =============================== */
 .category-item {
   flex: 0 0 auto;
-  color: #ccc;
-  padding: 8px 16px;
-  margin: 0 4px;
-  border-radius: 20px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: #272727;
+  color: #f1f1f1;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
   user-select: none;
-  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  letter-spacing: 0.3px;
 }
 
+/* Hover */
 .category-item:hover {
-  color: white;
-  background: #272727;
-  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+  background: #3d3d3d;
+  color: #ffffff;
 }
 
+/* Active */
 .category-item.active {
-  background: #4a90e2;
-  color: white;
-  box-shadow: 0 0 6px rgba(74, 144, 226, 0.5);
+  background: #ffffff;
+  color: #0f0f0f;
+  font-weight: 600;
 }
 
-/* Arrows */
+/* =============================== */
 .scroll-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  margin: 0 4px;
   border: none;
-  background: rgba(0, 0, 0, 0.3);
-  color: white;
-  font-size: 26px;
-  padding: 5px 8px;
-  cursor: pointer;
-  z-index: 1000;
   border-radius: 50%;
-  backdrop-filter: blur(3px);
-}
-
-.scroll-arrow.left {
-  left: 5px;
-}
-
-.scroll-arrow.right {
-  right: 5px;
+  background: rgba(30, 30, 30, 0.9);
+  color: #ffffff;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scroll-arrow:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(60, 60, 60, 0.9);
+  transform: scale(1.05);
+}
+
+.scroll-arrow:active {
+  transform: scale(0.92);
+}
+
+/* =============================== */
+/* Mobile */
+@media (max-width: 768px) {
+  .category-bar-container {
+    top: 48px;
+    height: 48px;
+    padding: 0 6px;
+  }
+
+  .category-item {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  .scroll-arrow {
+    width: 30px;
+    height: 30px;
+    font-size: 18px;
+    margin: 0 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .category-bar-container {
+    top: 44px;
+    height: 44px;
+    padding: 0 4px;
+  }
+
+  .category-item {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+
+  .scroll-arrow {
+    width: 26px;
+    height: 26px;
+    font-size: 14px;
+    margin: 0 2px;
+  }
 }

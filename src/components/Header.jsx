@@ -1,12 +1,14 @@
-// Updated Header.jsx with required search behavior
+// Updated Header.jsx with category reset on search
 import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 import { initGA, logPageView, logEvent } from "../utils/analytics";
 import { UserContext } from "../main";
 import { signInWithGoogle, signOutUser } from "../api/USER";
+import DownloadButton from "./DownloadButton";
+import DeveloperPopup from "./DeveloperPopup"; // 👈 ADD
 
-const Header = ({ onSearch, onSearchReset }) => {
+const Header = ({ onSearch, onSearchReset, onCategoryReset }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [suggestionsVisible, setSuggestionsVisible] = useState(false);
@@ -14,6 +16,7 @@ const Header = ({ onSearch, onSearchReset }) => {
   const [voiceOpen, setVoiceOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [developerPopupOpen, setDeveloperPopupOpen] = useState(false); // 👈 ADD
 
   const [isSearchActive, setIsSearchActive] = useState(false);
   const recognitionRef = useRef(null);
@@ -56,6 +59,10 @@ const Header = ({ onSearch, onSearchReset }) => {
   const performSearch = (term) => {
     if (!term.trim()) return;
 
+    if (onCategoryReset) {
+      onCategoryReset();
+    }
+
     const updated = [term, ...recentSearches.filter((t) => t !== term)].slice(0, 5);
     setRecentSearches(updated);
     localStorage.setItem("recentSearches", JSON.stringify(updated));
@@ -70,15 +77,13 @@ const Header = ({ onSearch, onSearchReset }) => {
     }
 
     setSuggestionsVisible(false);
-    setIsSearchActive(false); // collapse after search
+    setIsSearchActive(false);
   };
 
   const handleSearchButton = () => {
     if (isSearchActive) {
-      // Search bar expanded → perform search
       if (searchTerm.trim()) performSearch(searchTerm);
     } else {
-      // Search bar closed → expand
       setIsSearchActive(true);
       setSuggestionsVisible(true);
     }
@@ -135,6 +140,12 @@ const Header = ({ onSearch, onSearchReset }) => {
     if (target !== "profile") setProfileOpen(false);
   };
 
+  // 👇 ADD THIS FUNCTION
+  const openDeveloperPopup = () => {
+    setMenuOpen(false);
+    setDeveloperPopupOpen(true);
+  };
+
   return (
     <header className="header" ref={headerRef}>
       {isSearchActive && (
@@ -143,13 +154,52 @@ const Header = ({ onSearch, onSearchReset }) => {
         </button>
       )}
 
+      {/* 👇 UPDATED MENU BUTTON WITH DROPDOWN */}
       {!isSearchActive && (
-        <button className="icon-btn" onClick={() => {
-          closeAllExcept("menu");
-          setMenuOpen((prev) => !prev);
-        }}>
-          ☰
-        </button>
+        <div className="menu-wrapper">
+          <button 
+            className="icon-btn menu-btn" 
+            onClick={() => {
+              closeAllExcept("menu");
+              setMenuOpen((prev) => !prev);
+            }}
+            aria-label="Menu"
+          >
+            <span className="menu-icon">
+              <span className="menu-line"></span>
+              <span className="menu-line"></span>
+              <span className="menu-line"></span>
+            </span>
+          </button>
+
+          {/* Menu Dropdown */}
+          {menuOpen && (
+            <div className="menu-dropdown">
+              <div className="menu-dropdown-item" onClick={() => { 
+                setMenuOpen(false); 
+                navigate('/'); 
+              }}>
+                🏠 Home
+              </div>
+              <div className="menu-dropdown-item" onClick={() => { 
+                setMenuOpen(false); 
+                navigate('/download'); 
+              }}>
+                📥 Downloads
+              </div>
+              <div className="menu-dropdown-divider"></div>
+              <div className="menu-dropdown-item" onClick={openDeveloperPopup}>
+                👨‍💻 Developer
+              </div>
+              <div className="menu-dropdown-item" onClick={() => { 
+                setMenuOpen(false); 
+                window.open('https://github.com/yourusername', '_blank'); 
+              }}>
+                🐙 GitHub
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {!isSearchActive && (
@@ -157,7 +207,17 @@ const Header = ({ onSearch, onSearchReset }) => {
           if (location.pathname !== "/") navigate("/");
           else if (onSearchReset) onSearchReset();
         }}>
-          VPLEX.in
+          <div className="brand">
+            <img 
+              src="/logo.png" 
+              alt="Vplex" 
+              className="logo" 
+              style={{ width: '28px', height: '28px' }}
+            />
+            <span className="logo-text" style={{ fontSize: '16px' }}>
+              VPLEX<span className="domain" style={{ fontSize: '11px' }}>.in</span>
+            </span>
+          </div>
         </h1>
       )}
 
@@ -212,6 +272,8 @@ const Header = ({ onSearch, onSearchReset }) => {
             setNotificationsOpen((p) => !p);
           }}>🔔</button>
 
+          <DownloadButton />
+
           <button className="icon-btn" onClick={() => {
             closeAllExcept("profile");
             setProfileOpen((p) => !p);
@@ -237,6 +299,12 @@ const Header = ({ onSearch, onSearchReset }) => {
           )}
         </>
       )}
+
+      {/* 👇 ADD DEVELOPER POPUP */}
+      <DeveloperPopup 
+        isOpen={developerPopupOpen} 
+        onClose={() => setDeveloperPopupOpen(false)} 
+      />
     </header>
   );
 };

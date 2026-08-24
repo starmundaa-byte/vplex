@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# VPLEX generated files
+dist-electron/
+downloads/
+*.zip

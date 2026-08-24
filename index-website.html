@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VPlex Player - YouTube Alternative</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #0a0a0a;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== ANIMATED BACKGROUND ===== */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0a0a0a 100%);
+            z-index: -1;
+        }
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(102, 126, 234, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(118, 75, 162, 0.1) 0%, transparent 50%);
+            animation: rotateBg 30s linear infinite;
+        }
+        @keyframes rotateBg {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+        .logo span {
+            font-weight: 300;
+            -webkit-text-fill-color: #fff;
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        .nav-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 14px;
+        }
+        .nav-links a:hover {
+            color: #fff;
+        }
+        .nav-download-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white !important;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .nav-download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            color: white !important;
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80vh;
+            padding: 40px;
+            text-align: center;
+        }
+        .hero-content {
+            max-width: 800px;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+        .hero h1 .gradient {
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #aaa;
+            line-height: 1.8;
+            margin-bottom: 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.3s, background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* ===== FEATURES ===== */
+        .features {
+            padding: 80px 40px;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+        .feature-card .icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .feature-card p {
+            color: #aaa;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* ===== DOWNLOAD POPUP ===== */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .popup-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .popup-content {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            border-radius: 30px;
+            padding: 50px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+        }
+        .popup-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 28px;
+            color: #888;
+            cursor: pointer;
+            transition: color 0.3s;
+            background: none;
+            border: none;
+        }
+        .popup-close:hover {
+            color: #fff;
+        }
+        .popup-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .popup-subtitle {
+            color: #aaa;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+        .popup-platforms {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .platform-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.3s, border-color 0.3s;
+            cursor: pointer;
+        }
+        .platform-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+        .platform-card .icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+        .platform-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+        .platform-card p {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+        .platform-card .download-btn {
+            display: inline-block;
+            padding: 10px 30px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        .platform-card .download-btn.windows {
+            background: #0078d4;
+            color: white;
+        }
+        .platform-card .download-btn.windows:hover {
+            background: #0066b3;
+            transform: scale(1.02);
+        }
+        .platform-card .download-btn.android {
+            background: #34a853;
+            color: white;
+        }
+        .platform-card .download-btn.android:hover {
+            background: #2d9248;
+            transform: scale(1.02);
+        }
+        .platform-card .download-btn.mac {
+            background: #555;
+            color: white;
+        }
+        .platform-card .download-btn.mac:hover {
+            background: #444;
+            transform: scale(1.02);
+        }
+        .popup-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .popup-footer p {
+            color: #666;
+            font-size: 13px;
+        }
+        .popup-footer .version {
+            color: #888;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 15px 20px;
+            }
+            .logo {
+                font-size: 22px;
+            }
+            .nav-links {
+                gap: 15px;
+            }
+            .nav-links a {
+                font-size: 12px;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .popup-platforms {
+                grid-template-columns: 1fr;
+            }
+            .popup-content {
+                padding: 30px 20px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            .hero {
+                padding: 20px;
+            }
+            .popup-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== BACKGROUND ===== -->
+    <div class="bg-animation"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar">
+        <a href="#" class="logo">VPlex<span>Player</span></a>
+        <div class="nav-links">
+            <a href="#">Features</a>
+            <a href="#">About</a>
+            <a href="#" class="nav-download-btn" onclick="openPopup()">📥 Download</a>
+        </div>
+    </nav>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🚀 Free & Open Source</div>
+            <h1>
+                Watch Videos<br />
+                <span class="gradient">Without Limits</span>
+            </h1>
+            <p>
+                VPlex is a powerful video player that lets you watch your favorite
+                content without ads, trackers, or interruptions. Download now and
+                experience the future of video streaming.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn-primary" onclick="openPopup()">
+                    ⬇️ Download Now
+                </button>
+                <button class="btn-secondary" onclick="openPopup()">
+                    ▶️ Watch Demo
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURES ===== -->
+    <section class="features">
+        <h2>✨ Why Choose VPlex?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">🚫</div>
+                <h3>No Ads</h3>
+                <p>Watch your videos without any interruptions or annoying advertisements.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📱</div>
+                <h3>Cross Platform</h3>
+                <p>Available on Windows, Android, and coming soon to macOS and Linux.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>No tracking, no data collection. Your privacy is our priority.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h3>Fast & Light</h3>
+                <p>Optimized for performance. Runs smoothly on any device.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DOWNLOAD POPUP ===== -->
+    <div class="popup-overlay" id="downloadPopup">
+        <div class="popup-content">
+            <button class="popup-close" onclick="closePopup()">✕</button>
+
+            <div class="popup-title">
+                ⬇️ Download VPlex
+            </div>
+            <div class="popup-subtitle">
+                Choose your platform and start watching
+            </div>
+
+            <div class="popup-platforms">
+                <!-- Windows -->
+                <div class="platform-card">
+                    <div class="icon">🪟</div>
+                    <h3>Windows</h3>
+                    <p>Windows 10 / 11 • 80 MB</p>
+                    <a href="/downloads/VPlex-win32-x64/VPlex.exe" class="download-btn windows">
+                        ⬇️ Download for Windows
+                    </a>
+                </div>
+
+                <!-- Android -->
+                <div class="platform-card">
+                    <div class="icon">📱</div>
+                    <h3>Android</h3>
+                    <p>Android 8.0+ • 25 MB</p>
+                    <a href="/downloads/VPlex-Android.apk" class="download-btn android" id="androidDownload">
+                        ⬇️ Download for Android
+                    </a>
+                </div>
+
+                <!-- macOS (Coming Soon) -->
+                <div class="platform-card">
+                    <div class="icon">🍎</div>
+                    <h3>macOS</h3>
+                    <p>Coming Soon</p>
+                    <button class="download-btn mac" disabled>
+                        🔜 Coming Soon
+                    </button>
+                </div>
+
+                <!-- Linux (Coming Soon) -->
+                <div class="platform-card">
+                    <div class="icon">🐧</div>
+                    <h3>Linux</h3>
+                    <p>Coming Soon</p>
+                    <button class="download-btn mac" disabled>
+                        🔜 Coming Soon
+                    </button>
+                </div>
+            </div>
+
+            <div class="popup-footer">
+                <p>
+                    <span class="version">Version 1.0.0</span> •
+                    Updated August 2026 •
+                    <span style="color:#667eea;">Free & Open Source</span>
+                </p>
+                <p style="margin-top:10px; font-size:12px; color:#555;">
+                    💡 No installation required for Windows - just download and run!
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ===== POPUP FUNCTIONS =====
+        function openPopup() {
+            document.getElementById('downloadPopup').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePopup() {
+            document.getElementById('downloadPopup').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Close popup on outside click
+        document.getElementById('downloadPopup').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePopup();
+            }
+        });
+
+        // Close popup on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        });
+
+        // ===== AUTO SHOW POPUP ON PAGE LOAD =====
+        window.addEventListener('load', function() {
+            // Show popup after 2 seconds (only once per session)
+            if (!sessionStorage.getItem('popupShown')) {
+                setTimeout(() => {
+                    openPopup();
+                    sessionStorage.setItem('popupShown', 'true');
+                }, 2000);
+            }
+        });
+
+        // ===== DOWNLOAD TRACKING =====
+        document.querySelectorAll('.download-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                const platform = this.closest('.platform-card').querySelector('h3').textContent;
+                console.log(`📥 Download started: ${platform}`);
+                // You can add analytics here
+                // gtag('event', 'download', { 'platform': platform });
+            });
+        });
+
+        // ===== CHECK IF ANDROID APK EXISTS =====
+        fetch('/api/files')
+            .then(res => res.json())
+            .then(files => {
+                if (files && files.android) {
+                    document.getElementById('androidDownload').href = files.android;
+                }
+            })
+            .catch(() => {
+                // If API fails, keep default link
+                console.log('Using default download links');
+            });
+
+        // ===== AUTO DETECT DEVICE =====
+        function detectDevice() {
+            const ua = navigator.userAgent.toLowerCase();
+            if (ua.includes('android')) {
+                // User is on Android - highlight Android card
+                const cards = document.querySelectorAll('.platform-card');
+                cards.forEach(card => {
+                    if (card.querySelector('h3').textContent === 'Android') {
+                        card.style.borderColor = '#34a853';
+                        card.style.borderWidth = '2px';
+                    }
+                });
+            } else if (ua.includes('windows')) {
+                // User is on Windows - highlight Windows card
+                const cards = document.querySelectorAll('.platform-card');
+                cards.forEach(card => {
+                    if (card.querySelector('h3').textContent === 'Windows') {
+                        card.style.borderColor = '#0078d4';
+                        card.style.borderWidth = '2px';
+                    }
+                });
+            }
+        }
+        detectDevice();
+
+        console.log('🎬 VPlex Player Download Page');
+        console.log('📱 Download for Windows and Android');
+    </script>
+</body>
+</html>

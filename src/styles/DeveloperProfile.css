@@ -1,0 +1,253 @@
+/* ===== DEVELOPER PROFILE ===== */
+.developer-profile {
+    padding: 30px 20px;
+    max-width: 500px;
+    margin: 20px auto;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.4s ease;
+}
+
+.developer-profile:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(102, 126, 234, 0.2);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.developer-card {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 20px;
+}
+
+/* ===== AVATAR ===== */
+.developer-avatar-wrapper {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.developer-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid transparent;
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.2);
+}
+
+.developer-profile:hover .developer-avatar {
+    border-color: #667eea;
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+}
+
+/* ===== STATUS INDICATOR ===== */
+.developer-status {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(16, 185, 129, 0.95);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 600;
+    color: white;
+    transition: all 0.4s ease;
+    opacity: 0.9;
+}
+
+.developer-status.active {
+    opacity: 1;
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: white;
+    animation: pulseDot 2s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(0.8);
+    }
+}
+
+.status-text {
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* ===== DEVELOPER INFO ===== */
+.developer-info {
+    flex: 1;
+}
+
+.developer-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 2px 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.developer-role {
+    font-size: 13px;
+    color: #888;
+    margin: 0 0 4px 0;
+}
+
+.developer-bio {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+}
+
+/* ===== SOCIAL LINKS ===== */
+.developer-social {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    color: #aaa;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.social-link:hover {
+    transform: translateY(-2px);
+    color: #fff;
+}
+
+.social-link.github:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: #fff;
+}
+
+.social-link.linkedin:hover {
+    background: rgba(0, 119, 181, 0.15);
+    border-color: #0077b5;
+    color: #0077b5;
+}
+
+.social-link.twitter:hover {
+    background: rgba(29, 161, 242, 0.15);
+    border-color: #1da1f2;
+    color: #1da1f2;
+}
+
+.social-link.email:hover {
+    background: rgba(102, 126, 234, 0.15);
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.social-link span {
+    font-size: 14px;
+}
+
+/* ===== DEVELOPER FOOTER ===== */
+.developer-footer {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 13px;
+    color: #666;
+}
+
+.developer-footer strong {
+    color: #667eea;
+    font-weight: 600;
+}
+
+.developer-footer .footer-year {
+    color: #444;
+    margin-left: 6px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .developer-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .developer-social {
+        justify-content: center;
+    }
+
+    .developer-avatar {
+        width: 100px;
+        height: 100px;
+    }
+
+    .developer-status {
+        bottom: 4px;
+        right: 4px;
+        padding: 3px 8px;
+        font-size: 9px;
+    }
+}
+
+@media (max-width: 480px) {
+    .developer-profile {
+        padding: 16px 12px;
+    }
+
+    .developer-avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .developer-name {
+        font-size: 17px;
+    }
+
+    .developer-role {
+        font-size: 12px;
+    }
+
+    .developer-bio {
+        font-size: 12px;
+    }
+
+    .social-link {
+        padding: 3px 10px;
+        font-size: 11px;
+    }
+
+    .developer-footer {
+        font-size: 12px;
+    }
+}
