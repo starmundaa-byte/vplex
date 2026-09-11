@@ -1,47 +1,69 @@
 // src/main.jsx
-import React, { useEffect, useState, createContext } from "react";
+
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { onAuthChange, initAuthPersistence } from "./api/USER"; // ✅ use our service
+import { onAuthChange, initAuthPersistence } from "./api/USER";
 
-export const UserContext = createContext(null);
+import { UserContext } from "./context/UserContext";
 
 function Root() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let unsubscribe = null;
+    let cancelled = false;
+
     const init = async () => {
-      await initAuthPersistence(); // ensures login survives reloads & reinstalls
-      const unsubscribe = onAuthChange((currentUser) => {
-        setUser(currentUser);
+      try {
+        await initAuthPersistence();
+
+        if (cancelled) return;
+
+        unsubscribe = onAuthChange((currentUser) => {
+          setUser(currentUser);
+          setLoading(false);
+        });
+      } catch (error) {
+        console.error("❌ Auth initialization failed:", error);
         setLoading(false);
-      });
-      return unsubscribe;
+      }
     };
-    const cleanupPromise = init();
+
+    init();
+
     return () => {
-      cleanupPromise.then((unsubscribe) => unsubscribe && unsubscribe());
+      cancelled = true;
+
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+      }
     };
   }, []);
 
-  if (loading)
-    return (
-      <div style={{ color: "white", textAlign: "center", marginTop: "100px" }}>
-        Loading user...
-      </div>
-    );
-
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       <App />
     </UserContext.Provider>
   );
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
+
+// ============================================================
+// SINGLE REACT ROOT
+// ============================================================
+
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error("❌ Root element #root was not found.");
+}
+
+const root = ReactDOM.createRoot(rootElement);
+
+root.render(
+  <Root />
 );

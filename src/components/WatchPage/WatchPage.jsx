@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { fetchVideoById, fetchRelatedVideos } from "../../api/youtubeAPI";
 import WatchMobile from "./WatchMobile";
 import WatchDesktop from "./WatchDesktop";
+import WatchPageSkeleton from "../WatchPageSkeleton";
 import "../../styles/WatchPage.css";
 
 export default function WatchPage() {
@@ -26,15 +27,21 @@ export default function WatchPage() {
     const loadData = async () => {
       setLoading(true);
       try {
+        // ✅ 1. Fetch ONLY the video first (fast)
         const vid = await fetchVideoById(id);
+
+        if (cancel) return;
+
+        // ✅ 2. Immediately set the video and show the player
+        setVideo(vid);
+        setLoading(false);
+
+        // ✅ 3. Fetch related videos in the background (do not block the player)
         const rel = await fetchRelatedVideos(id);
-        if (!cancel) {
-          setVideo(vid);
-          setRelated(rel);
-        }
+        if (!cancel) setRelated(rel);
+
       } catch (err) {
         console.error("Error loading video:", err);
-      } finally {
         if (!cancel) setLoading(false);
       }
     };
@@ -43,7 +50,9 @@ export default function WatchPage() {
     return () => (cancel = true);
   }, [id]);
 
-  if (loading) return <div className="watchpage-wrapper">Loading...</div>;
+  // ✅ SKELETON ONLY SHOWS WHILE FETCHING THE MAIN VIDEO
+  if (loading) return <WatchPageSkeleton />;
+  
   if (!video) return <div className="watchpage-wrapper">Video not found</div>;
 
   return isMobile ? (

@@ -821,3 +821,26 @@
         gap: 8px;
     }
 }
+
+/* =====================================================
+   SMALL MOBILE FIX (Hide Title Text)
+===================================================== */
+@media (max-width: 600px) {
+  /* Hide the "VPLEX.in" text, show logo only */
+  .title .logo-text {
+    display: none !important;
+  }
+
+  /* Ensure the logo is centered and looks good */
+  .title {
+    margin: 0 !important;
+    gap: 0 !important;
+  }
+
+  /* Make the search bar stretch to take the extra space */
+  .search-bar {
+    flex: 1;
+    margin: 0 12px; /* Adjust margin to give the search bar some breathing room */
+    min-width: 0;   /* Prevents flex overflow on very small screens */
+  }
+}

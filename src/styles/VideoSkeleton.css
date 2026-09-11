@@ -1,0 +1,50 @@
+/* ✅ SKELETON LOADING STYLES */
+.skeleton-card {
+  cursor: default !important;
+  pointer-events: none !important;
+  background: transparent !important; /* Remove the #111 background from .video-card */
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1a1a1a 25%, #3a3a3a 37%, #1a1a1a 63%) !important;
+  background-size: 400% 100% !important;
+  animation: skeleton-loading 1.4s ease infinite !important;
+  border-radius: 8px;
+  opacity: 1 !important;
+}
+
+@keyframes skeleton-loading {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+.skeleton-thumbnail {
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  border-radius: 8px 8px 0 0 !important;
+  height: auto !important;
+}
+
+.skeleton-info {
+  padding: 10px;
+}
+
+.skeleton-text-title {
+  width: 80% !important;
+  height: 16px !important;
+  margin-bottom: 10px !important;
+}
+
+.skeleton-text-short {
+  width: 50% !important;
+  height: 12px !important;
+  margin-bottom: 8px !important;
+}
+
+/* Skeleton Channel Logo */
+.channel-logo-skeleton {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  margin-top: 10px !important;
+}

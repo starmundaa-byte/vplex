@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/Header.css";
 import { initGA, logPageView, logEvent } from "../utils/analytics";
-import { UserContext } from "../main";
+import { UserContext } from "../context/UserContext";
 import { signInWithGoogle, signOutUser } from "../api/USER";
 import DownloadButton from "./DownloadButton";
 import DeveloperPopup from "./DeveloperPopup"; // 👈 ADD
@@ -29,13 +29,12 @@ const Header = ({ onSearch, onSearchReset, onCategoryReset }) => {
   const location = useLocation();
 
   useEffect(() => {
-    initGA();
-    logPageView(window.location.pathname + window.location.search);
-  }, []);
+  initGA();
+}, []);
 
-  useEffect(() => {
-    logPageView(location.pathname + location.search);
-  }, [location]);
+useEffect(() => {
+  logPageView(location.pathname + location.search);
+}, [location.pathname, location.search]);
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("recentSearches")) || [];
@@ -146,8 +145,8 @@ const Header = ({ onSearch, onSearchReset, onCategoryReset }) => {
     setDeveloperPopupOpen(true);
   };
 
-  return (
-    <header className="header" ref={headerRef}>
+  return (        
+     <header className="header" ref={headerRef}>
       {isSearchActive && (
         <button className="icon-btn back-btn" onClick={() => { setIsSearchActive(false); setSearchTerm(""); setSuggestionsVisible(false); }}>
           ←
@@ -306,7 +305,9 @@ const Header = ({ onSearch, onSearchReset, onCategoryReset }) => {
         onClose={() => setDeveloperPopupOpen(false)} 
       />
     </header>
-  );
+  )
+   
+  ;
 };
 
 export default Header;

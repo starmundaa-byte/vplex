@@ -25,7 +25,8 @@ const API_KEYS = [
 "AIzaSyDU6-dQH0Qs_nJULWW8zv1ZS39TK4T5gMc",
 "AIzaSyBLLGGLMi8Qz_4NTFJ65AaNTM8g-j0tZ2o",
 "AIzaSyC-uwwoegGzxr4-Hk4B7aMrEw-znrYJNTs",
-
+"AIzaSyAkgYt8LteBn2neGyX95Lzoig8KlD5t1eE",
+"AIzaSyCNMvWVIlKc6vKA5OYEY2jVzFEItLxCwRc",
 
   // add more keys if needed
 ];

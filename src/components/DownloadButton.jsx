@@ -46,12 +46,13 @@ const DownloadButton = () => {
             color: '#0078d4'
         },
         android: {
-            icon: '📱',
-            name: 'Android',
-            size: '25 MB',
-            link: '/downloads/VPlex-Android.apk',
-            color: '#34a853'
-        },
+    icon: '📱',
+    name: 'Android',
+    size: '25 MB',
+    link: '/app/vplex.apk',
+    color: '#34a853'
+       },
+        
         mac: {
             icon: '🍎',
             name: 'macOS',
@@ -170,9 +171,10 @@ const DownloadButton = () => {
                             </a>
 
                             {/* Android */}
-                            <a href="/downloads/VPlex-Android.apk" 
-                               className="platform-card android"
-                               onClick={() => trackDownload('android')}>
+                            <a href="/app/vplex.apk" 
+   className="platform-card android"
+   download
+   onClick={() => trackDownload('android')}>
                                 <div className="platform-icon">📱</div>
                                 <h3>Android</h3>
                                 <p>Android 8.0+ • 25 MB</p>

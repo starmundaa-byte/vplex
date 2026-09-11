@@ -4,7 +4,7 @@
 
 .category-bar-container {
   position: sticky;
-  top: 45px; /* Match header height */
+  top: 0px; /* Match header height */
   width: 100%;
   height: 56px;
   display: flex;
