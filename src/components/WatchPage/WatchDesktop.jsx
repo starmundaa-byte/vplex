@@ -5,16 +5,21 @@ import VideoDetails from "./VideoDetails";
 import VideoActions from "./VideoActions";
 import CommentsSection from "./CommentsSection";
 import RelatedVideos from "./RelatedVideos";
+import WatchBannerAd from "../ads/WatchBannerAds";
+import RelatedFeedAd from "../ads/RelatedFeedAds";
 import "../../styles/WatchDesktop.css";
 
-export default function WatchDesktop({ video, related }) {
+export default function WatchDesktop({ video, searchContext = [] }) {
+  if (!video) return null;
+
   return (
     <div className="watch-desktop">
-
       <div className="left-section">
         <div className="player-sticky">
           <VideoPlayer video={video} />
         </div>
+
+        <WatchBannerAd />
 
         <VideoDetails video={video} />
         <VideoActions video={video} />
@@ -22,10 +27,9 @@ export default function WatchDesktop({ video, related }) {
       </div>
 
       <div className="right-section">
-        {/* FIX: pass videoId instead of related */}
-        <RelatedVideos videoId={video.id} />
+        <RelatedFeedAd />
+        <RelatedVideos videoId={video.id} searchContext={searchContext} />
       </div>
-
     </div>
   );
 }
