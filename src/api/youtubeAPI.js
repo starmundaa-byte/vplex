@@ -232,30 +232,84 @@ export const fetchChannelDetails = async (channelId) => {
 };
 
 /* -------------------------------------------
-   🎯 Smart Related Videos (clickable & autoplay)
+   🎯 Related Videos — Metadata-Driven (v2)
+   Since YouTube deprecated relatedToVideoId (Aug 2023),
+   we build relevance from the video's own tags + category.
 ------------------------------------------- */
-export const fetchRelatedVideos = async (videoId, limit = 10) => {
+export const fetchRelatedVideos = async (videoId, limit = 20) => {
   if (!videoId) return [];
 
   try {
+    // 1️⃣ Fetch the current video's FULL metadata (tags, category, channel)
     const main = await fetchVideoById(videoId);
+    if (!main) return [];
+
+    // 2️⃣ Build a smart search query from tags → title keywords
+    const rawTags = await getVideoTags(videoId); // helper below
+    const titleKeywords = main.title
+      .replace(/[^a-zA-Z0-9 ]/g, " ")
+      .split(" ")
+      .filter((w) => w.length > 3)
+      .slice(0, 5)
+      .join(" ");
+
+    const smartQuery =
+      rawTags.length > 0
+        ? rawTags.slice(0, 3).join(" ")
+        : titleKeywords || main.title;
 
     const steps = [];
 
-    // Step 1 → Directly related vids
+    // Step 1 → Search by tag-derived query, filter to same category
     try {
       const s = await apiGet("search", {
         part: "snippet",
-        relatedToVideoId: videoId,
         type: "video",
+        q: smartQuery,
+        videoCategoryId: main.categoryId,
         maxResults: 20,
         videoEmbeddable: "true",
+        regionCode: "IN",
       });
       steps.push(s.items.map(normalizeItem));
-    } catch {}
+    } catch (err) {
+      console.warn("[Related] Tag search failed:", err.message);
+    }
 
-    // Step 2 → Same category
-    if (main?.categoryId) {
+    // Step 2 → Title keywords fallback (broader)
+    try {
+      const s = await apiGet("search", {
+        part: "snippet",
+        type: "video",
+        q: titleKeywords || main.title,
+        maxResults: 15,
+        videoEmbeddable: "true",
+        regionCode: "IN",
+      });
+      steps.push(s.items.map(normalizeItem));
+    } catch (err) {
+      console.warn("[Related] Keyword search failed:", err.message);
+    }
+
+    // Step 3 → Same channel (recent uploads)
+    if (main.channelId) {
+      try {
+        const s = await apiGet("search", {
+          part: "snippet",
+          type: "video",
+          channelId: main.channelId,
+          order: "date",
+          maxResults: 12,
+          videoEmbeddable: "true",
+        });
+        steps.push(s.items.map(normalizeItem));
+      } catch (err) {
+        console.warn("[Related] Channel search failed:", err.message);
+      }
+    }
+
+    // Step 4 → Same category trending (last resort)
+    if (main.categoryId) {
       try {
         const s = await apiGet("videos", {
           part: "snippet",
@@ -264,51 +318,16 @@ export const fetchRelatedVideos = async (videoId, limit = 10) => {
           videoCategoryId: main.categoryId,
           maxResults: 12,
         });
-
         steps.push(
-          s.items.map((v) =>
-            normalizeItem({ id: v.id, snippet: v.snippet })
-          )
+          s.items.map((v) => normalizeItem({ id: v.id, snippet: v.snippet }))
         );
-      } catch {}
+      } catch (err) {
+        console.warn("[Related] Trending search failed:", err.message);
+      }
     }
 
-    // Step 3 → Title keywords
-    try {
-      const kw = main.title
-        .replace(/[^a-zA-Z0-9 ]/g, " ")
-        .split(" ")
-        .filter((w) => w.length > 3)
-        .slice(0, 5)
-        .join(" ");
-
-      const s = await apiGet("search", {
-        part: "snippet",
-        type: "video",
-        q: kw || main.title,
-        maxResults: 15,
-        videoEmbeddable: "true",
-      });
-
-      steps.push(s.items.map(normalizeItem));
-    } catch {}
-
-    // Step 4 → Same channel
-    if (main?.channelId) {
-      try {
-        const s = await apiGet("search", {
-          part: "snippet",
-          type: "video",
-          channelId: main.channelId,
-          order: "date",
-          maxResults: 15,
-        });
-        steps.push(s.items.map(normalizeItem));
-      } catch {}
-    }
-
-    // Merge + dedupe
-    const seen = new Set();
+    // 3️⃣ Merge + dedupe + EXCLUDE the current video
+    const seen = new Set([videoId]); // 🚫 prevent self-recommendation
     const merged = [];
 
     for (const arr of steps) {
@@ -317,21 +336,105 @@ export const fetchRelatedVideos = async (videoId, limit = 10) => {
           seen.add(v.id);
           merged.push(v);
         }
-        if (merged.length >= limit) break;
+        if (merged.length >= limit * 1.5) break; // extra buffer for hydration
       }
+      if (merged.length >= limit * 1.5) break;
     }
 
+    // 4️⃣ Hydrate the merged list with FULL details (real durations + views)
+    const hydrated = await hydrateVideos(merged.slice(0, limit));
+
+    // 5️⃣ Attach channel logos
     const channelMap = await fetchChannelLogos(
-      [...new Set(merged.map((v) => v.channelId))]
+      [...new Set(hydrated.map((v) => v.channelId))]
     );
 
-    return merged.map((v) => ({
+    return hydrated.map((v) => ({
       ...v,
       channelLogo: channelMap[v.channelId] || null,
-      duration: generateFakeDuration(v.title),
-      views: Math.floor(Math.random() * 800000 + 15000),
     }));
+  } catch (err) {
+    console.error("[fetchRelatedVideos] fatal:", err);
+    return [];
+  }
+};
+
+/* -------------------------------------------
+   🔧 Helper: Fetch raw tags for a video
+   (fetchVideoById doesn't return tags currently)
+------------------------------------------- */
+const getVideoTags = async (videoId) => {
+  try {
+    const data = await apiGet("videos", {
+      part: "snippet",
+      id: videoId,
+    });
+    return data.items?.[0]?.snippet?.tags || [];
   } catch {
     return [];
   }
+};
+
+/* -------------------------------------------
+   🔧 Helper: Hydrate search-list items with full stats
+   Search results don't include duration/viewCount — we fetch them here.
+------------------------------------------- */
+const hydrateVideos = async (items) => {
+  if (!items.length) return [];
+
+  const ids = items.map((v) => v.id).filter(Boolean);
+  if (!ids.length) return items;
+
+  try {
+    const data = await apiGet("videos", {
+      part: "snippet,contentDetails,statistics",
+      id: ids.join(","),
+    });
+
+    const detailMap = {};
+    data.items?.forEach((v) => {
+      detailMap[v.id] = v;
+    });
+
+    return items.map((item) => {
+      const detail = detailMap[item.id];
+      if (!detail) return item;
+
+      return {
+        ...item,
+        title: detail.snippet?.title || item.title,
+        channelId: detail.snippet?.channelId || item.channelId,
+        channelTitle: detail.snippet?.channelTitle || item.channelTitle,
+        thumbnail:
+          detail.snippet?.thumbnails?.medium?.url ||
+          item.thumbnail ||
+          "",
+        publishedAt: detail.snippet?.publishedAt || item.publishedAt,
+        duration: formatISODuration(detail.contentDetails?.duration || ""),
+        views: parseInt(detail.statistics?.viewCount || "0", 10),
+      };
+    });
+  } catch (err) {
+    console.warn("[hydrateVideos] failed:", err.message);
+    return items;
+  }
+};
+
+/* -------------------------------------------
+   🔧 Helper: ISO 8601 → "H:MM:SS" or "M:SS"
+------------------------------------------- */
+const formatISODuration = (iso) => {
+  if (!iso) return "";
+  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return "";
+
+  const [, h, m, s] = match;
+  const hours = parseInt(h || "0", 10);
+  const minutes = parseInt(m || "0", 10);
+  const seconds = parseInt(s || "0", 10);
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 };
