@@ -37,9 +37,4 @@
   scrollbar-width: none;
 }
 
-/* RELATED VIDEO CARDS (use existing) */
-.related-videos {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+
