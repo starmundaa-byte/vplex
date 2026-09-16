@@ -1,27 +1,64 @@
+// src/components/WatchPage/RelatedVideos.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchRelatedVideos } from "../../api/youtubeAPI";
+import { mergeRelatedFeeds } from "../../utils/MergeRelatedFeed"; // ⬅ NEW
 import "../../styles/RelatedVideo.css";
 
-export default function RelatedVideos({ videoId }) {
+export default function RelatedVideos({ videoId, searchContext = [] }) {
   const [relatedVideos, setRelatedVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!videoId) return;
+
+    let cancelled = false;
+
     const load = async () => {
       setLoading(true);
-      const data = await fetchRelatedVideos(videoId);
-      setRelatedVideos(data);
-      setLoading(false);
+      try {
+        // 1️⃣ Fetch content-based recommendations
+        const contentBased = await fetchRelatedVideos(videoId, 20);
+
+        // 2️⃣ Merge with search context (3:1 interleave)
+        const merged = mergeRelatedFeeds(
+          contentBased,
+          searchContext,
+          videoId,
+          20
+        );
+
+        if (!cancelled) {
+          setRelatedVideos(Array.isArray(merged) ? merged : []);
+        }
+      } catch (err) {
+        console.error("[RelatedVideos] fetch failed:", err);
+        if (!cancelled) setRelatedVideos([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     };
+
     load();
-  }, [videoId]);
+    return () => { cancelled = true; };
+  }, [videoId, searchContext]);
+
+  /* ---------- Formatters ---------- */
+
+  function formatViews(views) {
+    const n = Number(views) || 0;
+    if (n >= 1_000_000_000) return `${(n / 1_000_000_000).toFixed(1)}B views`;
+    if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M views`;
+    if (n >= 1_000) return `${Math.floor(n / 1_000)}K views`;
+    return `${n} views`;
+  }
 
   function formatDuration(text) {
-    return text;
+    return text || "";
   }
+
+  /* ---------- Loading / Empty states ---------- */
 
   if (loading) {
     return (
@@ -39,15 +76,17 @@ export default function RelatedVideos({ videoId }) {
     );
   }
 
+  /* ---------- Render ---------- */
+
   return (
     <div className="related-videos">
       {relatedVideos.map((vid) => (
         <div
           key={vid.id}
           className="related-video-card"
+          data-source={vid.source}   // ⬅ for debugging (inspect element)
           onClick={() => navigate(`/watch/${vid.id}`)}
         >
-          {/* Thumbnail wrapper FULL WIDTH */}
           <div className="related-thumb-wrapper">
             <img
               src={vid.thumbnail}
@@ -55,7 +94,6 @@ export default function RelatedVideos({ videoId }) {
               className="related-thumb"
               loading="lazy"
             />
-
             {vid.duration && (
               <span className="related-duration">
                 {formatDuration(vid.duration)}
@@ -63,7 +101,6 @@ export default function RelatedVideos({ videoId }) {
             )}
           </div>
 
-          {/* Info BELOW thumbnail */}
           <div className="related-info">
             <p className="related-title">{vid.title}</p>
 
@@ -79,9 +116,7 @@ export default function RelatedVideos({ videoId }) {
                 <span>{vid.channelTitle}</span>
               </div>
 
-              <p className="related-views">
-                {Math.floor(vid.views / 1000)}K views
-              </p>
+              <p className="related-views">{formatViews(vid.views)}</p>
             </div>
           </div>
         </div>
